@@ -1,0 +1,59 @@
+/* Styling for the card container */
+.card {
+    margin-top: 10%;
+    margin-left: 20%;
+    margin-right: 20%;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: white;
+    text-align: center; /* Ensures elements inside the card are aligned */
+}
+
+/* Add spacing between form components */
+
+
+/* Styling for the button */
+button {
+    padding: 8px 12px; /* Smaller size for the button */
+    font-size: 14px; /* Adjusted font size */
+    border: none;
+    border-radius: 5px;
+    color: white;
+    background-color: #4caf50; /* Success color */
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 20px; /* Adds space between form and the button */
+}
+
+button:hover {
+    background-color: #45a049; /* Darker green on hover */
+}
+/* Center the button */
+.icon-button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px; /* Adds spacing from other components */
+}
+
+/* Customize the button size and appearance */
+.icon-button {
+    background-color: #4caf50; /* Success color for the background */
+    border-radius: 50%; /* Makes the button circular */
+    padding: 10px; /* Adjusts size */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transitions */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+/* Button hover effect */
+.icon-button:hover {
+    background-color: #45a049; /* Darker green on hover */
+    transform: scale(1.1); /* Slight enlargement on hover */
+}
+
+/* Disabled button styling */
+.icon-button:disabled {
+    background-color: #ccc; /* Gray background for disabled state */
+    cursor: not-allowed; /* Change cursor to indicate disabled state */
+    box-shadow: none; /* Remove shadow for disabled button */
+}
