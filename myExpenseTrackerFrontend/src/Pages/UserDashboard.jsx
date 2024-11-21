@@ -4,14 +4,13 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { createTheme } from "@mui/material/styles";
 import DashboardIcon from "@mui/icons-material/Dashboard";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import BarChartIcon from "@mui/icons-material/BarChart";
-import DescriptionIcon from "@mui/icons-material/Description";
 import LayersIcon from "@mui/icons-material/Layers";
 import { AppProvider } from "@toolpad/core/AppProvider";
 import { DashboardLayout } from "@toolpad/core/DashboardLayout";
 import { useDemoRouter } from "@toolpad/core/internal";
 import CreateForm from "../Components/CreateForm";
+import TripCard from "../Components/TripCard"; // Assuming you have TripCard in Components folder
 
 const demoTheme = createTheme({
   cssVariables: {
@@ -40,7 +39,20 @@ function DemoPageContent({ pathname }) {
         textAlign: "center",
       }}
     >
-      <Typography>Dashboard content for {pathname}</Typography>
+      <Typography variant="h4" gutterBottom>
+        Dashboard content for {pathname}
+      </Typography>
+      
+      {/* Include the TripCard here */}
+      
+      <TripCard
+      photo="https://media.istockphoto.com/id/996724730/vector/pattern.jpg?s=2048x2048&w=is&k=20&c=o_2ZRF4ALdLPsiMXit5yAh3QUHemDYZVS5EHLh3O2XE="
+      tripName="Beach Paradise"
+      description="Relax and unwind at the serene beach."
+      date="1st Jan 2025"
+      codeToCopy={`jhlkkjl`}
+    />
+
     </Box>
   );
 }
@@ -65,7 +77,6 @@ function UserDashboard(props) {
   const router = useDemoRouter("/dashboard");
   const demoWindow = window !== undefined ? window() : undefined;
 
-  // Updated navigation to include the handler
   const NAVIGATION = [
     {
       kind: "header",
@@ -114,7 +125,6 @@ function UserDashboard(props) {
     >
       <DashboardLayout>
         <DemoPageContent pathname={router.pathname} />
-        {/* Include CreateForm */}
         <CreateForm open={isCreateFormOpen} onClose={handleCloseCreateForm} />
       </DashboardLayout>
     </AppProvider>
@@ -122,10 +132,6 @@ function UserDashboard(props) {
 }
 
 UserDashboard.propTypes = {
-  /**
-   * Injected by the documentation to work in an iframe.
-   * Remove this when copying and pasting into your project.
-   */
   window: PropTypes.func,
 };
 
