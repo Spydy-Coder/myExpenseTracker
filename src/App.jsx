@@ -4,6 +4,7 @@ import Join from './Pages/Join';
 import AddNew from './Pages/AddNew';
 import ListOfExpense from './Pages/ListOfExpense';
 import './App.css';
+import Login from './Pages/Login';
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
       
       <Routes>
         <Route path="/" element={<ListOfExpense />} />
+        <Route path="/Login" element={<Login />} />
         <Route path="/join" element={<Join />} />
         <Route path="/add-new" element={<AddNew />} />
         <Route path="/list" element={<ListOfExpense />} />
