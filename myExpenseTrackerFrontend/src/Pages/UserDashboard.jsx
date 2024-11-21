@@ -12,7 +12,10 @@ import { AppProvider } from "@toolpad/core/AppProvider";
 import { DashboardLayout } from "@toolpad/core/DashboardLayout";
 import { useDemoRouter } from "@toolpad/core/internal";
 import CreateForm from "../Components/CreateForm";
-
+import AddBoxIcon from '@mui/icons-material/AddBox';
+import PolylineIcon from '@mui/icons-material/Polyline';
+import { useNavigate } from "react-router-dom";
+import { nanoid } from "nanoid";
 const demoTheme = createTheme({
   cssVariables: {
     colorSchemeSelector: "data-toolpad-color-scheme",
@@ -50,6 +53,7 @@ DemoPageContent.propTypes = {
 };
 
 function UserDashboard(props) {
+  const navigate = useNavigate();
   const { window } = props;
 
   const [isCreateFormOpen, setIsCreateFormOpen] = React.useState(false);
@@ -73,13 +77,8 @@ function UserDashboard(props) {
     },
     {
       segment: "dashboard",
-      title: <Typography onClick={handleOpenCreateForm}>Dashboard</Typography>,
-      icon: (
-        <DashboardIcon
-          onClick={handleOpenCreateForm}
-          style={{ cursor: "pointer" }}
-        />
-      ),
+      title: <Typography onClick={()=> navigate("/dashboard")}>Dashboard</Typography>,
+      icon: <DashboardIcon style={{ cursor: "pointer" }} onClick={()=> navigate("/dashboard")}/>,
     },
     {
       kind: "divider",
@@ -89,14 +88,24 @@ function UserDashboard(props) {
       title: "Actions",
     },
     {
-      segment: "reports",
-      title: "Reports",
-      icon: <BarChartIcon />,
+      segment: "create",
+      title: <Typography onClick={handleOpenCreateForm}>Create</Typography>,
+      icon: (
+        <AddBoxIcon
+          onClick={handleOpenCreateForm}
+          style={{ cursor: "pointer" }}
+        />
+      ),
     },
     {
-      segment: "integrations",
-      title: "Integrations",
-      icon: <LayersIcon />,
+      segment: "join",
+      title: <Typography onClick={handleOpenCreateForm}>Join</Typography>,
+      icon: (
+        <PolylineIcon
+          onClick={handleOpenCreateForm}
+          style={{ cursor: "pointer" }}
+        />
+      ),
     },
   ];
 
