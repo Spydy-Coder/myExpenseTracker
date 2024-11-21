@@ -48,7 +48,7 @@ const TripCard = ({ photo, tripName, description, date, codeToCopy }) => {
           position: "relative",
           mt: 1,
           mx: 3,
-          md:1
+          mb:1
         }}
       >
         <Typography
