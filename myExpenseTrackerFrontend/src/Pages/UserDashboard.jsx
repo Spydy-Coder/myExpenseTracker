@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import CreateForm from "../Components/CreateForm";
 import TripCard from "../Components/TripCard"; // Ensure this is correctly imported
 
+import ChipsPopupForm from "../Components/ChipsPopupForm";
 const demoTheme = createTheme({
   cssVariables: {
     colorSchemeSelector: "data-toolpad-color-scheme",
@@ -83,9 +84,16 @@ function UserDashboard(props) {
   const { window } = props;
 
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
+  const [ isChipFormOpen,  setIsChipFormOpen] = useState(false);
 
   const handleOpenCreateForm = () => {
     setIsCreateFormOpen(true);
+  };
+  const handleCloseChipForm = () => {
+    setIsChipFormOpen(false);
+  };
+  const handleOpenChipForm = () => {
+    setIsChipFormOpen(true);
   };
 
   const handleCloseCreateForm = () => {
@@ -119,8 +127,8 @@ function UserDashboard(props) {
     },
     {
       segment: "join",
-      title: <Typography onClick={handleOpenCreateForm}>Join</Typography>,
-      icon: <PolylineIcon onClick={handleOpenCreateForm} style={{ cursor: "pointer" }} />,
+      title: <Typography onClick={handleOpenChipForm}>Join</Typography>,
+      icon: <PolylineIcon onClick={handleOpenChipForm} style={{ cursor: "pointer" }} />,
     },
   ];
 
@@ -133,6 +141,7 @@ function UserDashboard(props) {
       <DashboardLayout>
         <DemoPageContent pathname={router.pathname} />
         <CreateForm open={isCreateFormOpen} onClose={handleCloseCreateForm} />
+        <ChipsPopupForm open={isChipFormOpen} onClose={handleCloseChipForm} />
       </DashboardLayout>
     </AppProvider>
   );

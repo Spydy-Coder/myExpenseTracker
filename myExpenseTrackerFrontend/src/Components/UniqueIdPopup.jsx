@@ -39,7 +39,17 @@ export default function UniqueIdPopup({ open, onClose, uniqueId }) {
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} variant="outlined" color="error">
+        <Button
+          onClick={onClose}
+          variant="outlined"
+          color="error"
+          sx={{
+            "&:hover": {
+              backgroundColor: "rgba(255, 0, 0, 0.1)", // Keep hover effect subtle
+              color: "error.main", // Ensure consistent color
+            },
+          }}
+        >
           Close
         </Button>
       </DialogActions>
