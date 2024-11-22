@@ -7,6 +7,7 @@ import ListOfExpense from './Pages/ListOfExpense';
 import UserDashboard from './Pages/UserDashboard';
 import './App.css';
 import Login from './Pages/Login';
+import SignUp from './Pages/SignUp';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/join" element={<Join />} />
         <Route path="/add-new" element={<AddNew />} />
         <Route path="/list" element={<ListOfExpense />} />
+        <Route path="/signup" element={<SignUp />} />
       </Routes>
     </Router>
   );
