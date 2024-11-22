@@ -16,7 +16,7 @@ function App() {
       <Routes>
         <Route path="/" element={<ListOfExpense />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<UserDashboard />} />
+        <Route path="/dashboard/:userId" element={<UserDashboard />} />
         <Route path="/join" element={<Join />} />
         <Route path="/add-new" element={<AddNew />} />
         <Route path="/list" element={<ListOfExpense />} />

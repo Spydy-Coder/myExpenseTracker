@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Box, TextField, Button, Typography } from '@mui/material';
 import Card from '@mui/material/Card';
+import { useNavigate } from 'react-router-dom';  // Import useNavigate for navigation
 
 const SignIn = () => {
-  const [message, setMessage] = useState('');  // State to hold the message
-  const [messageType, setMessageType] = useState('');  // State for message type (success/error)
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState('');
+  const navigate = useNavigate();  // Initialize useNavigate hook
 
-  // Handle login logic
   const signIn = async (formData) => {
     const { email, password } = Object.fromEntries(formData.entries());
 
@@ -20,21 +21,20 @@ const SignIn = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Login successful
-        setMessage('Login successful!');  // Set the success message
-        setMessageType('success');  // Set message type to success
+        setMessage('Login successful!');
+        setMessageType('success');
 
         // Store userId in localStorage
         localStorage.setItem('userId', data.userId);
 
-        // Redirect to dashboard
-        window.location.href = '/dashboard';  // Redirect to your actual dashboard route
+        // Redirect to the user's dashboard with their ID
+        navigate(`/dashboard/${data.userId}`);
       } else {
-        setMessage(`Error: ${data.error}`);  // Set the error message
-        setMessageType('error');  // Set message type to error
+        setMessage(`Error: ${data.error}`);
+        setMessageType('error');
       }
     } catch (error) {
-      setMessage('Something went wrong. Please try again.');  // General error message
+      setMessage('Something went wrong. Please try again.');
       setMessageType('error');
     }
   };
@@ -46,7 +46,7 @@ const SignIn = () => {
   };
 
   return (
-    <Card sx={{ maxWidth: 400, margin: 'auto', padding: 3,marginTop:'10' }}>
+    <Card sx={{ maxWidth: 400, margin: 'auto', padding: 3, marginTop: 10 }}>
       <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         <Typography variant="h4" component="h1" align="center" gutterBottom>
           Sign In
