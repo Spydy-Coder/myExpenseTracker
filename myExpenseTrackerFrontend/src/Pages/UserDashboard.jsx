@@ -18,6 +18,7 @@ import { nanoid } from "nanoid";
 import TripCard from "../Components/TripCard"; // Assuming you have TripCard in Components folder
 
 
+import ChipsPopupForm from "../Components/ChipsPopupForm";
 const demoTheme = createTheme({
   cssVariables: {
     colorSchemeSelector: "data-toolpad-color-scheme",
@@ -72,9 +73,18 @@ function UserDashboard(props) {
   const { window } = props;
 
   const [isCreateFormOpen, setIsCreateFormOpen] = React.useState(false);
+  const [isChipFormOpen, setIsChipFormOpen] = React.useState(false);
+
+
 
   const handleOpenCreateForm = () => {
     setIsCreateFormOpen(true);
+  };
+  const handleCloseChipForm = () => {
+    setIsChipFormOpen(false);
+  };
+  const handleOpenChipForm = () => {
+    setIsChipFormOpen(true);
   };
 
   const handleCloseCreateForm = () => {
@@ -113,7 +123,7 @@ function UserDashboard(props) {
     },
     {
       segment: "join",
-      title: <Typography onClick={handleOpenCreateForm}>Join</Typography>,
+      title: <Typography onClick={handleOpenChipForm}>Join</Typography>,
       icon: (
         <PolylineIcon
           onClick={handleOpenCreateForm}
@@ -138,6 +148,7 @@ function UserDashboard(props) {
       <DashboardLayout>
         <DemoPageContent pathname={router.pathname} />
         <CreateForm open={isCreateFormOpen} onClose={handleCloseCreateForm} />
+        <ChipsPopupForm open={isChipFormOpen} onClose={handleCloseChipForm} />
       </DashboardLayout>
     </AppProvider>
   );
