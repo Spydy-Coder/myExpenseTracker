@@ -7,6 +7,7 @@ const cors = require('cors');
 dotenv.config();
 
 const app = express();
+// define the port
 const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
@@ -22,7 +23,7 @@ mongoose.connect(process.env.MONGO_URI, {
 });
 
 // Define a simple route
-app.get('/', (req, res) => {
+app.get('/', (req, res) => { 
   res.send('Hello World!');
 });
 
@@ -35,3 +36,10 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
+// 1.import the express
+// 2.by using app we can do all type of http requests
+// 3.the server must listen the request
+
+
+//1.import the route
+//2.use it
