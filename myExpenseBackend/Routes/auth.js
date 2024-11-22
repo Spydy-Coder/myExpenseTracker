@@ -1,31 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../Models/User');
+const { registerUser, loginUser } = require('../Controllers/authController');
 
-// Register a new user
-router.post('/register', async (req, res) => {
-  const { email, password } = req.body;
-  try {
-    const newUser = new User({ email, password });
-    await newUser.save();
-    res.status(201).json(newUser);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
+// Register Route
+router.post('/register', registerUser);
 
-// Login a user
-router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
-  try {
-    const user = await User.findOne({ email });
-    if (!user || user.password !== password) {
-      return res.status(400).json({ error: 'Invalid credentials' });
-    }
-    res.status(200).json(user);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+// Login Route
+router.post('/login', loginUser);
 
 module.exports = router;
+
+//we can make clean the routes by defing the logic in the controller
+//in router we only have to difine the route

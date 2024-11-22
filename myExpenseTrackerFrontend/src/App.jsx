@@ -7,6 +7,7 @@ import ListOfExpense from './Pages/ListOfExpense';
 import UserDashboard from './Pages/UserDashboard';
 import './App.css';
 import Login from './Pages/Login';
+import SignUp from './Pages/SignUp';
 
 function App() {
   return (
@@ -15,10 +16,11 @@ function App() {
       <Routes>
         <Route path="/" element={<ListOfExpense />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<UserDashboard />} />
+        <Route path="/dashboard/:userId" element={<UserDashboard />} />
         <Route path="/join" element={<Join />} />
         <Route path="/add-new" element={<AddNew />} />
         <Route path="/list" element={<ListOfExpense />} />
+        <Route path="/signup" element={<SignUp />} />
       </Routes>
     </Router>
   );

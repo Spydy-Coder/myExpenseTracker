@@ -1,18 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const TripSchema = require('../Models/TripSchema');
+const { createTrip, getUserTrips } = require('../Controllers/tripController');
 
-// Register a new user
-router.post('/create', async (req, res) => {
-  try {
-    console.log("create",req.body)
-    const newTrip = new TripSchema(req.body);
-    console.log("new",newTrip)
-    await newTrip.save();
-    res.status(201).json(newTrip);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
+// Route to create a new trip
+router.post('/create', createTrip);
+
+// Route to fetch trips for a specific user
+router.get('/user/:userId', getUserTrips);
 
 module.exports = router;
