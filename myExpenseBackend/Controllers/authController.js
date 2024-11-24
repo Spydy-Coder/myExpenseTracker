@@ -24,12 +24,15 @@ exports.registerUser = async (req, res) => {
       password: hashedPassword,
     });
 
-    await newUser.save();
+    const newUSer= await newUser.save();
+   
     const token = await newUser.generateToken();
+    const userId = newUSer._id;
 
     res.status(201).json({
       message: "Account created successfully!",
       token: token,
+      userId
     });
   } catch (error) {
     res
