@@ -32,6 +32,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/trip', tripRoutes);
 
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

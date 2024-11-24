@@ -1,15 +1,19 @@
-import * as React from 'react';
-import { AppProvider } from '@toolpad/core/AppProvider';
-import { useTheme } from '@mui/material/styles';
-import { Box, TextField, Button, Typography, Card, Link } from '@mui/material'; // Import Link component
+import * as React from "react";
+import { AppProvider } from "@toolpad/core/AppProvider";
+import { useTheme } from "@mui/material/styles";
+import { Box, TextField, Button, Typography, Card, Link } from "@mui/material"; // Import Link component
+import { useAuth } from "../Auth/AuthProvider";
+import { useNavigate } from "react-router-dom";
 
 const SignUp = () => {
-  const [message, setMessage] = React.useState('');  // State to hold success or error message
+  const [message, setMessage] = React.useState(""); // State to hold success or error message
+  const { login } = useAuth();
   const [formData, setFormData] = React.useState({
-    username: '',
-    email: '',
-    password: '',
-  });  // State to hold form data
+    username: "",
+    email: "",
+    password: "",
+  }); // State to hold form data
+  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -24,27 +28,31 @@ const SignUp = () => {
     const { username, email, password } = formData;
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, email, password }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        setMessage('Account created successfully!');  // Show success message
-        setFormData({ username: '', email: '', password: '' });  // Clear form
+        setMessage("Account created successfully!"); // Show success message
+        login(data.token, data.userId);
+        navigate(`/dashboard/${data.userId}`);
+        setFormData({ username: "", email: "", password: "" }); // Clear form
       } else {
         // If the error message indicates that the email is already in use
-        if (data.error && data.error.includes('Email already in use')) {
-          setMessage('Account already exists. Please log in or use a different email.');
+        if (data.error && data.error.includes("Email already in use")) {
+          setMessage(
+            "Account already exists. Please log in or use a different email."
+          );
         } else {
           setMessage(`Error: ${data.error}`);
         }
       }
     } catch (error) {
-      setMessage('Something went wrong. Please try again.');  // Show generic error message
+      setMessage("Something went wrong. Please try again."); // Show generic error message
     }
   };
 
@@ -55,7 +63,7 @@ const SignUp = () => {
       <Card
         sx={{
           maxWidth: 400,
-          margin: 'auto',
+          margin: "auto",
           mt: 8,
           p: 4,
           boxShadow: 3,
@@ -66,9 +74,9 @@ const SignUp = () => {
           component="form"
           onSubmit={handleSubmit}
           sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
             gap: 2,
           }}
         >
@@ -112,7 +120,10 @@ const SignUp = () => {
               variant="body2"
               sx={{
                 mt: 2,
-                color: message.includes('Error') || message.includes('already') ? 'red' : 'green',
+                color:
+                  message.includes("Error") || message.includes("already")
+                    ? "red"
+                    : "green",
               }}
             >
               {message}
@@ -120,7 +131,7 @@ const SignUp = () => {
           )}
 
           <Typography variant="body2" sx={{ mt: 2 }}>
-            Already have an account?{' '}
+            Already have an account?{" "}
             <Link href="/login" underline="hover">
               Go to login
             </Link>

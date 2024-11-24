@@ -1,27 +1,32 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import Join from './Pages/Join';
-import AddNew from './Pages/AddNew';
-import ListOfExpense from './Pages/ListOfExpense';
-
-import UserDashboard from './Pages/UserDashboard';
-import './App.css';
-import Login from './Pages/Login';
-import SignUp from './Pages/SignUp';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import  {AuthProvider } from "./Auth/AuthProvider";
+import ProtectedRoute from "./Auth/ProtectedRoute ";
+import UserDashboard from "./Pages/UserDashboard";
+import "./App.css";
+import Login from "./Pages/Login";
+import SignUp from "./Pages/SignUp";
+import HomePage from "./Pages/HomePage";
 
 function App() {
   return (
     <Router>
-      
-      <Routes>
-        <Route path="/" element={<ListOfExpense />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/dashboard/:userId" element={<UserDashboard />} />
-        <Route path="/join" element={<Join />} />
-        <Route path="/add-new" element={<AddNew />} />
-        <Route path="/list" element={<ListOfExpense />} />
-        <Route path="/signup" element={<SignUp />} />
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/login" element={<Login />} />
+
+          <Route
+            path="/dashboard/:userId"
+            element={
+              <ProtectedRoute>
+                <UserDashboard />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </AuthProvider>
     </Router>
   );
 }

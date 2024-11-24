@@ -11,9 +11,10 @@ import { DashboardLayout } from "@toolpad/core/DashboardLayout";
 import { useDemoRouter } from "@toolpad/core/internal";
 import { useNavigate } from "react-router-dom";
 import CreateForm from "../Components/CreateForm";
-import TripCard from "../Components/TripCard"; // Ensure this is correctly imported
-
-import ChipsPopupForm from "../Components/ChipsPopupForm";
+import TripCard from "../Components/TripCard";
+import ChipsPopupForm2 from "../Components/ChipsPopupForm2";
+import { useAuth } from "../Auth/AuthProvider";
+import LogoutIcon from "@mui/icons-material/Logout";
 const demoTheme = createTheme({
   cssVariables: {
     colorSchemeSelector: "data-toolpad-color-scheme",
@@ -23,7 +24,7 @@ const demoTheme = createTheme({
     values: {
       xs: 0,
       sm: 600,
-      md: 600,
+      md: 900,
       lg: 1200,
       xl: 1536,
     },
@@ -32,13 +33,14 @@ const demoTheme = createTheme({
 
 function DemoPageContent({ pathname }) {
   const [trips, setTrips] = useState([]);
-  const userId = localStorage.getItem("userId");  // Fetch user ID from storage or auth context
+  const userId = localStorage.getItem("userId");
 
   useEffect(() => {
-    // Fetch user-specific trips
     const fetchTrips = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/trip/user/${userId}`);
+        const response = await fetch(
+          `http://localhost:5000/trip/user/${userId}`
+        );
         if (!response.ok) {
           throw new Error("Failed to fetch trips");
         }
@@ -53,23 +55,41 @@ function DemoPageContent({ pathname }) {
   }, []);
 
   return (
-    <Box sx={{ py: 4, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+    <Box sx={{ py: 4, textAlign: "center" }}>
       <Typography variant="h4" gutterBottom>
         Your Trips
       </Typography>
       {trips.length === 0 ? (
         <Typography>No trips found. Create one to get started!</Typography>
       ) : (
-        trips.map((trip) => (
-          <TripCard
-            key={trip.uniqueId}
-            photo="https://www.shutterstock.com/shutterstock/photos/1247506609/display_1500/stock-vector-cabriolet-car-with-people-diverse-group-of-men-and-women-enjoy-ride-and-music-happy-young-friends-1247506609.jpg"  // Replace with dynamic image if available
-            tripName={trip.tripName}
-            description={trip.desc}
-            date={new Date(trip.date).toLocaleDateString()}
-            codeToCopy={trip.uniqueId}
-          />
-        ))
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            gap: "20px",
+          }}
+        >
+          {trips.map((trip) => (
+            <Box
+              key={trip.uniqueId}
+              sx={{
+                width: { xs: "100%", sm: "45%", md: "30%" }, // Responsive widths
+                boxSizing: "border-box",
+                padding: "10px",
+                marginBottom: "20px",
+              }}
+            >
+              <TripCard
+                photo="https://www.shutterstock.com/shutterstock/photos/1247506609/display_1500/stock-vector-cabriolet-car-with-people-diverse-group-of-men-and-women-enjoy-ride-and-music-happy-young-friends-1247506609.jpg"
+                tripName={trip.tripName}
+                description={trip.desc}
+                date={new Date(trip.date).toLocaleDateString()}
+                codeToCopy={trip.uniqueId}
+              />
+            </Box>
+          ))}
+        </Box>
       )}
     </Box>
   );
@@ -81,10 +101,11 @@ DemoPageContent.propTypes = {
 
 function UserDashboard(props) {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const { window } = props;
 
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
-  const [ isChipFormOpen,  setIsChipFormOpen] = useState(false);
+  const [isChipFormOpen, setIsChipFormOpen] = useState(false);
 
   const handleOpenCreateForm = () => {
     setIsCreateFormOpen(true);
@@ -95,9 +116,11 @@ function UserDashboard(props) {
   const handleOpenChipForm = () => {
     setIsChipFormOpen(true);
   };
-
   const handleCloseCreateForm = () => {
     setIsCreateFormOpen(false);
+  };
+  const handleLogout = () => {
+    logout();
   };
 
   const router = useDemoRouter("/dashboard/:userId");
@@ -110,8 +133,17 @@ function UserDashboard(props) {
     },
     {
       segment: "dashboard",
-      title: <Typography onClick={() => navigate("/dashboard/:userId")}>Dashboard</Typography>,
-      icon: <DashboardIcon style={{ cursor: "pointer" }} onClick={() => navigate("/dashboard")} />,
+      title: (
+        <Typography onClick={() => navigate(`/dashboard/${userId}`)}>
+          Dashboard
+        </Typography>
+      ),
+      icon: (
+        <DashboardIcon
+          style={{ cursor: "pointer" }}
+          onClick={() => navigate(`/dashboard/${userId}`)}
+        />
+      ),
     },
     {
       kind: "divider",
@@ -123,12 +155,30 @@ function UserDashboard(props) {
     {
       segment: "create",
       title: <Typography onClick={handleOpenCreateForm}>Create</Typography>,
-      icon: <AddBoxIcon onClick={handleOpenCreateForm} style={{ cursor: "pointer" }} />,
+      icon: (
+        <AddBoxIcon
+          onClick={handleOpenCreateForm}
+          style={{ cursor: "pointer" }}
+        />
+      ),
     },
     {
       segment: "join",
       title: <Typography onClick={handleOpenChipForm}>Join</Typography>,
-      icon: <PolylineIcon onClick={handleOpenChipForm} style={{ cursor: "pointer" }} />,
+      icon: (
+        <PolylineIcon
+          onClick={handleOpenChipForm}
+          style={{ cursor: "pointer" }}
+        />
+      ),
+    },
+    {
+      kind: "divider",
+    },
+    {
+      segment: "logout",
+      title: <Typography onClick={handleLogout}>Logout</Typography>,
+      icon: <LogoutIcon onClick={handleLogout} style={{ cursor: "pointer" }} />,
     },
   ];
 
@@ -137,11 +187,17 @@ function UserDashboard(props) {
   };
 
   return (
-    <AppProvider navigation={NAVIGATION} router={router} theme={demoTheme} window={demoWindow} branding={BRANDING}>
+    <AppProvider
+      navigation={NAVIGATION}
+      router={router}
+      theme={demoTheme}
+      window={demoWindow}
+      branding={BRANDING}
+    >
       <DashboardLayout>
         <DemoPageContent pathname={router.pathname} />
         <CreateForm open={isCreateFormOpen} onClose={handleCloseCreateForm} />
-        <ChipsPopupForm open={isChipFormOpen} onClose={handleCloseChipForm} />
+        <ChipsPopupForm2 open={isChipFormOpen} onClose={handleCloseChipForm} />
       </DashboardLayout>
     </AppProvider>
   );
