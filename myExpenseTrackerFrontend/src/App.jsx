@@ -19,14 +19,6 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
 
-
-          <Router>
-      <AuthProvider>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/login" element={<Login />} />
-
           {/* <Route
             path="/dashboard/:userId"
             element={
@@ -43,11 +35,6 @@ function App() {
           <Route path="trip/:tripId" element={<TripContent />} />
         </Route>
       
-        </Routes>
-      </AuthProvider>
-    </Router>
-      
-
         </Routes>
       </AuthProvider>
     </Router>
