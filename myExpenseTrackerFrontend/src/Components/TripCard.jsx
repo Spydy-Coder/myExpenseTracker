@@ -22,7 +22,7 @@ const TripCard = ({ photo, tripName, description, date, codeToCopy }) => {
   };
 
   return (
-    <MuiCard sx={{ maxWidth: 345, boxShadow: 3, borderRadius: 2 }}>
+    <MuiCard sx={{ minWidth: 300, boxShadow: 3, borderRadius: 2 }}>
       {/* Image Section */}
       <CardMedia component="img" height="140" image={photo} alt={tripName} />
 

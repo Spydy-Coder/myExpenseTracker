@@ -12,11 +12,12 @@ import {
 const JoinTrip = ({ open, onClose }) => {
   const [tripCode, setTripCode] = useState("");
   const [error, setError] = useState("");
+  const apiUrl = import.meta.env.VITE_API_URL;
 
   const handleJoinTrip = async () => {
     const userId = localStorage.getItem("userId");
     try {
-      const response = await fetch("http://localhost:5000/trip/join", {
+      const response = await fetch(`${apiUrl}/trip/join`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tripCode, userId }),

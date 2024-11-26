@@ -9,12 +9,13 @@ const SignIn = () => {
   const [messageType, setMessageType] = useState("");
   const navigate = useNavigate(); // Initialize useNavigate hook
   const { login } = useAuth();
+  const apiUrl = import.meta.env.VITE_API_URL;
 
   const signIn = async (formData) => {
     const { email, password } = Object.fromEntries(formData.entries());
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
+      const response = await fetch(`${apiUrl}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

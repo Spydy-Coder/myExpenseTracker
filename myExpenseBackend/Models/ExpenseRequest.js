@@ -6,6 +6,11 @@ const expenseRequestSchema = new mongoose.Schema({
     ref: "User", // Assuming you have a User model
     required: true,
   },
+  payee: {
+    type: mongoose.Schema.Types.ObjectId, // Reference to the user
+    ref: "User", // Assuming you have a User model
+    required: true,
+  },
   trip_id: {
     type: String, // Reference to the trip
     required: true,

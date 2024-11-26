@@ -14,8 +14,10 @@ import {
   TableRow,
   Paper,
   Button,
+  Container,
 } from "@mui/material";
 import { useParams } from "react-router-dom";
+import InsertChartOutlinedIcon from '@mui/icons-material/InsertChartOutlined';
 
 function ExpensesCards() {
   const [expensesData, setExpensesData] = useState({});
@@ -23,13 +25,14 @@ function ExpensesCards() {
   const [error, setError] = useState(null);
   const { tripId } = useParams();
   const currentUserId = localStorage.getItem("userId");
+  const apiUrl = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     const fetchExpenses = async () => {
       setLoading(true);
       try {
         const response = await fetch(
-          `http://localhost:5000/expense/get/${tripId}/${currentUserId}`,
+          `${apiUrl}/expense/${tripId}/${currentUserId}`,
           {
             method: "GET",
             headers: { "Content-Type": "application/json" },
@@ -41,6 +44,7 @@ function ExpensesCards() {
         }
 
         const result = await response.json();
+
         setExpensesData(result.data);
       } catch (err) {
         setError("Failed to fetch expenses.");
@@ -56,10 +60,10 @@ function ExpensesCards() {
   // Sort expenses by the size of table data
   const sortExpensesBySize = (expensesData) => {
     return Object.keys(expensesData)
-      .map((userId) => ({
-        ...expensesData[userId],
-        userId,
-        totalExpenses: expensesData[userId].expenses.length,
+      .map((index) => ({
+        ...expensesData[index],
+        userId: expensesData[index].userDetails.id,
+        totalExpenses: expensesData[index].expenses.length,
       }))
       .sort((a, b) =>
         a.userId === currentUserId
@@ -73,12 +77,13 @@ function ExpensesCards() {
   // Send Request to store data in the database
   const sendRequest = async (userId, totalMoney, expenses) => {
     try {
-      const response = await fetch("http://localhost:5000/expense/store", {
+      const response = await fetch(`${apiUrl}/expense/request`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           trip_id: tripId,
           user_id: userId,
+          payee: currentUserId,
           total_money: totalMoney,
           expenses: expenses.map(({ category, desc, amount }) => ({
             category,
@@ -130,8 +135,9 @@ function ExpensesCards() {
 
   const sortedExpenses = sortExpensesBySize(expensesData);
 
-  const copyToClipboard = (userEmail, expenses, totalAmount) => {
-    const tableData = `User: ${userEmail}
+  const copyToClipboard = (userEmail, userName, expenses, totalAmount) => {
+    const tableData = `User: ${userName}
+Email: ${userEmail} 
 Category | Amount | Description
 ${expenses
   .map(
@@ -151,11 +157,13 @@ Total: ₹${totalAmount}`;
         flexWrap: "wrap",
         gap: 3,
         justifyContent: "center",
-        alignItems: "flex-start",
+        alignItems: "center",
+        height:'auto',
+        width:"auto",
         p: 3,
       }}
     >
-      {sortedExpenses.map(({ userDetails: user, expenses, userId }) => {
+      { sortedExpenses.length>0 ? sortedExpenses.map(({ userDetails: user, expenses, userId }) => {
         const totalAmount = expenses.reduce(
           (acc, expense) => acc + expense.amount,
           0
@@ -165,7 +173,7 @@ Total: ₹${totalAmount}`;
           <Card
             key={userId}
             sx={{
-              minWidth: 400,
+              minWidth: 300,
               maxWidth: "100%",
               boxShadow: 6,
               borderRadius: "16px",
@@ -261,24 +269,26 @@ Total: ₹${totalAmount}`;
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
-                  gap: "16px"
+                  gap: "16px",
                 }}
-              > {userId !== currentUserId ?  <Button
-                sx={{
-                  backgroundColor: "#219ebc",
-                  color: "#FFF",
-                  fontWeight: "bold",
-                  "&:hover": {
-                    backgroundColor: "#126782",
-                  },
-                }}
-                variant="contained"
-                onClick={() => sendRequest(userId, totalAmount, expenses)}
               >
-                Send Request
-              </Button> :null}
-               
-
+                {" "}
+                {userId !== currentUserId ? (
+                  <Button
+                    sx={{
+                      backgroundColor: "#219ebc",
+                      color: "#FFF",
+                      fontWeight: "bold",
+                      "&:hover": {
+                        backgroundColor: "#126782",
+                      },
+                    }}
+                    variant="contained"
+                    onClick={() => sendRequest(userId, totalAmount, expenses)}
+                  >
+                    Send Request
+                  </Button>
+                ) : null}
                 <Button
                   sx={{
                     backgroundColor: "#219ebc",
@@ -290,7 +300,12 @@ Total: ₹${totalAmount}`;
                   }}
                   variant="contained"
                   onClick={() =>
-                    copyToClipboard(user.email, expenses, totalAmount)
+                    copyToClipboard(
+                      user.email,
+                      user.name,
+                      expenses,
+                      totalAmount
+                    )
                   }
                 >
                   Copy Expense
@@ -299,7 +314,46 @@ Total: ₹${totalAmount}`;
             </CardContent>
           </Card>
         );
-      })}
+      }) : <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100px',
+        textAlign: 'center',
+        padding: 2,
+        background: 'linear-gradient(135deg, #6e7aee, #ad79f5)',
+        borderRadius: 2,
+        boxShadow: 3,
+        maxWidth: '600px',
+        margin: '0 auto',
+      }}
+    >
+      <Box sx={{ marginRight: 2 }}>
+        <InsertChartOutlinedIcon sx={{ fontSize: 50, color: '#fff' }} />
+      </Box>
+      <Box>
+        <Typography
+          variant="h5"
+          sx={{
+            color: 'white',
+            fontWeight: 600,
+            mb: 1,
+          }}
+        >
+          Hi Traveller
+        </Typography>
+        <Typography
+          variant="body1"
+          sx={{
+            color: 'white',
+            opacity: 0.8,
+          }}
+        >
+          No expenses have been created yet.
+        </Typography>
+      </Box>
+    </Box>}
     </Box>
   );
 }

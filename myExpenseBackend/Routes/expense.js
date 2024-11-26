@@ -1,8 +1,26 @@
-const {saveExpense, getExpensesByTripAndUser} = require("../Controllers/expenseController")
-const express = require('express');
+
+const express = require("express");
 const router = express.Router();
 
+// Import the controller functions
+const {
+  saveExpense,
+  getExpensesByTripAndUser,
+  getExpensesRequestByUser,
+ 
+  saveExpenseRequest,
+} = require("../Controllers/expenseController");
+
+// Route to create a new expense entry
 router.post("/create", saveExpense);
-router.get("/get/:tripId/:userId", getExpensesByTripAndUser);
+
+// Route to get all expense requests for a specific user
+router.get("/requests/:userId", getExpensesRequestByUser);
+
+// Route to get expenses for a specific trip and user
+router.get("/:tripId/:userId", getExpensesByTripAndUser);
+
+// Route to save an expense request
+router.post("/request", saveExpenseRequest);
 
 module.exports = router;

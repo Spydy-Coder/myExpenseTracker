@@ -30,6 +30,7 @@ export default function SplitExpenseForm({ open, onClose }) {
   const [fetchError, setFetchError] = useState(""); // Fetch error
   const {tripId} = useParams(); // Replace with dynamic trip ID if needed
   const userId = localStorage.getItem("userId")
+  const apiUrl = import.meta.env.VITE_API_URL;
 
   const clearAll = () =>{
     setSelectedCategory("");
@@ -44,7 +45,7 @@ export default function SplitExpenseForm({ open, onClose }) {
   useEffect(() => {
     if (open) {
       setLoading(true);
-      fetch(`http://localhost:5000/trip/allusernames/${tripId}`) // Replace with your API endpoint
+      fetch(`${apiUrl}/trip/allusernames/${tripId}`) // Replace with your API endpoint
         .then((response) => {
           if (!response.ok) {
             throw new Error("Failed to fetch usernames");
@@ -196,7 +197,7 @@ export default function SplitExpenseForm({ open, onClose }) {
       })),
     };
     console.log(expenseData)
-    fetch("http://localhost:5000/expense/create", {
+    fetch(`${apiUrl}/expense/create`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(expenseData),
