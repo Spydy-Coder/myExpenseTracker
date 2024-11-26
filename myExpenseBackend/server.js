@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const authRoutes = require('./Routes/auth');
 const tripRoutes = require('./Routes/trip');
+const expenseRoutes = require("./Routes/expense")
 const cors = require('cors');
 dotenv.config();
 
@@ -31,6 +32,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/trip', tripRoutes);
+app.use('/expense', expenseRoutes);
 
 
 app.listen(PORT, () => {

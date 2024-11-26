@@ -9,7 +9,7 @@ import {
   Typography
 } from "@mui/material";
 
-const ChipsPopupForm2 = ({ open, onClose }) => {
+const JoinTrip = ({ open, onClose }) => {
   const [tripCode, setTripCode] = useState("");
   const [error, setError] = useState("");
 
@@ -70,4 +70,4 @@ const ChipsPopupForm2 = ({ open, onClose }) => {
   );
 };
 
-export default ChipsPopupForm2;
+export default JoinTrip;

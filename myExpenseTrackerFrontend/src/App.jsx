@@ -7,6 +7,8 @@ import "./App.css";
 import Login from "./Pages/Login";
 import SignUp from "./Pages/SignUp";
 import HomePage from "./Pages/HomePage";
+import DashboardContent from "./Components/DashboardContent";
+import TripContent from "./Components/TripContent";
 
 function App() {
   return (
@@ -17,15 +19,35 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
 
-          <Route 
-          path="/dashboard/:userId" 
-          element={
-            // Wrap with ProtectedRoute if needed
-            <ProtectedRoute>
-              <UserDashboard />
-            </ProtectedRoute>
-          } 
-        />
+
+          <Router>
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/login" element={<Login />} />
+
+          {/* <Route
+            path="/dashboard/:userId"
+            element={
+              <ProtectedRoute>
+                <UserDashboard />
+              </ProtectedRoute>
+            }
+          /> */}
+          
+        {/* Dashboard Layout */}
+        <Route path="/dashboard/*" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>}>
+          {/* Nested Routes */}
+          <Route path=":userId" element={<DashboardContent />} />
+          <Route path="trip/:tripId" element={<TripContent />} />
+        </Route>
+      
+        </Routes>
+      </AuthProvider>
+    </Router>
+      
+
         </Routes>
       </AuthProvider>
     </Router>
