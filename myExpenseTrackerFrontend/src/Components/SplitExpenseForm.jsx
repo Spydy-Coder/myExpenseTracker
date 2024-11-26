@@ -23,11 +23,22 @@ export default function SplitExpenseForm({ open, onClose }) {
   const [usernames, setUsernames] = useState({ members: [] }); // Usernames fetched from backend
   const [selectedOptions, setSelectedOptions] = useState([]); // Selected usernames (by id)
   const [totalMoney, setTotalMoney] = useState(""); // Total money input
+  const [description,setDescription] = useState("");
   const [amounts, setAmounts] = useState({}); // Amounts for each username
   const [error, setError] = useState(""); // Validation error
   const [loading, setLoading] = useState(false); // Loading state for usernames
   const [fetchError, setFetchError] = useState(""); // Fetch error
-  const tripId = "fMSQeuMA"; // Replace with dynamic trip ID if needed
+  const {tripId} = useParams(); // Replace with dynamic trip ID if needed
+  const userId = localStorage.getItem("userId")
+
+  const clearAll = () =>{
+    setSelectedCategory("");
+    setDescription("");
+    setTotalMoney("");
+    setSelectedOptions([]);
+    setAmounts({});
+    setError("");
+  }
 
   // Fetch usernames from the backend when the popup opens
   useEffect(() => {
@@ -60,6 +71,10 @@ export default function SplitExpenseForm({ open, onClose }) {
   // Handle total money input
   const handleTotalMoneyChange = (event) => {
     setTotalMoney(event.target.value);
+    setError(""); // Clear error when total money is changed
+  };
+  const handleDescriptionChange = (event) => {
+    setDescription(event.target.value);
     setError(""); // Clear error when total money is changed
   };
 
@@ -135,6 +150,27 @@ export default function SplitExpenseForm({ open, onClose }) {
   };
 
   // Handle form submission
+  // const handleSubmit = (event) => {
+  //   event.preventDefault();
+
+  //   const total = selectedOptions.reduce(
+  //     (sum, userId) => sum + Number(amounts[userId] || 0),
+  //     0
+  //   );
+
+  //   if (total > Number(totalMoney)) {
+  //     setError("The sum of the amounts exceeds the total money.");
+  //   } else {
+  //     console.log("Submitted Data:", {
+  //       category: selectedCategory,
+  //       totalMoney,
+  //       selectedOptions,
+  //       amounts,
+  //     });
+  //     onClose(); // Close the dialog
+  //   }
+  // };
+
   const handleSubmit = (event) => {
     event.preventDefault();
 
@@ -145,16 +181,43 @@ export default function SplitExpenseForm({ open, onClose }) {
 
     if (total > Number(totalMoney)) {
       setError("The sum of the amounts exceeds the total money.");
-    } else {
-      console.log("Submitted Data:", {
-        category: selectedCategory,
-        totalMoney,
-        selectedOptions,
-        amounts,
-      });
-      onClose(); // Close the dialog
+      return;
     }
+
+    const expenseData = {
+      tripId,
+      category: selectedCategory,
+      description,
+      totalMoney: Number(totalMoney),
+      issuedBy: userId, // Replace with actual user ID
+      members: selectedOptions.map((id) => ({
+        userId: id,
+        amount: Number(amounts[id]),
+      })),
+    };
+    console.log(expenseData)
+    fetch("http://localhost:5000/expense/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(expenseData),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to save expense");
+        }
+        return response.json();
+      })
+      .then(() => {
+        console.log("Expense saved successfully");
+        clearAll();
+        onClose();
+      })
+      .catch((error) => {
+        console.error("Error saving expense:", error);
+        setError("Failed to save expense. Please try again.");
+      });
   };
+
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -176,6 +239,14 @@ export default function SplitExpenseForm({ open, onClose }) {
               ))}
             </Select>
           </FormControl>
+          <TextField
+            label="Description"
+            type="text"
+            fullWidth
+            value={description}
+            onChange={handleDescriptionChange}
+            sx={{ mb: 2 }}
+          />
 
           {/* Total Money Input */}
           <TextField
@@ -201,12 +272,18 @@ export default function SplitExpenseForm({ open, onClose }) {
               {usernames.members.map((member) => (
                 <Box
                   key={member.id}
-                  sx={{ display: "flex", alignItems: "center", gap: "16px" }}
+                  sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px" }}
                 >
                   <Chip
-                    label={member.username}
+                    label={member.id === userId ? "Self" : member.username}
                     clickable
-                    color={selectedOptions.includes(member.id) ? "primary" : "default"}
+                    color={
+                      member.id === userId && selectedOptions.includes(member.id)
+                        ? "success"
+                        : selectedOptions.includes(member.id)
+                        ? "primary"
+                        : "default"
+                    }
                     onClick={() => handleOptionToggle(member.id)}
                     sx={{
                       border: selectedOptions.includes(member.id)
@@ -221,7 +298,7 @@ export default function SplitExpenseForm({ open, onClose }) {
                       size="small"
                       value={amounts[member.id] || ""}
                       onChange={(event) => handleAmountChange(member.id, event)}
-                      sx={{ width: "150px" }}
+                      sx={{ width: "150px"}}
                     />
                   )}
                 </Box>
@@ -259,7 +336,19 @@ export default function SplitExpenseForm({ open, onClose }) {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={onClose}>Cancel</Button>
+        <Button
+            onClick={onClose}
+            variant="outlined"
+            color="error"
+            sx={{
+              "&:hover": {
+                backgroundColor: "rgba(255, 0, 0, 0.1)",
+                color: "error.main",
+              },
+            }}
+          >
+            Cancel
+          </Button>
           <Button type="submit" variant="contained">
             Submit
           </Button>
