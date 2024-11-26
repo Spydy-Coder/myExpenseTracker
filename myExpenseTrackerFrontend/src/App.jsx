@@ -17,14 +17,15 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
 
-          <Route
-            path="/dashboard/:userId"
-            element={
-              <ProtectedRoute>
-                <UserDashboard />
-              </ProtectedRoute>
-            }
-          />
+          <Route 
+          path="/dashboard/:userId" 
+          element={
+            // Wrap with ProtectedRoute if needed
+            <ProtectedRoute>
+              <UserDashboard />
+            </ProtectedRoute>
+          } 
+        />
         </Routes>
       </AuthProvider>
     </Router>
