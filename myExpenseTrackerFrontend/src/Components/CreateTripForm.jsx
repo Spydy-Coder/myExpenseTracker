@@ -9,10 +9,10 @@ import DialogTitle from "@mui/material/DialogTitle";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import UniqueIdPopup from "../Components/UniqueIdPopup";
+import UniqueIdPopup from "./UniqueIdPopup";
 import { useState } from "react";
 
-export default function CreateForm({ open, onClose }) {
+export default function CreateTripForm({ open, onClose }) {
   const [selectedDate, setSelectedDate] = useState(null);
   const [openUnique, setOpenUnique] = useState(false);
   const [uniqueId, setUniqueId] = useState("");
