@@ -1,14 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const { registerUser, loginUser } = require('../Controllers/authController');
+const { registerUser, loginUser, fetchUpiId, updateUpiId } = require('../Controllers/authController');
 
-// Register Route
+// Route to register a user
 router.post('/register', registerUser);
 
-// Login Route
+// Route to login a user
 router.post('/login', loginUser);
 
-module.exports = router;
+// Route to fetch UPI ID for a user
+router.get('/user/:userId/upi', fetchUpiId);
 
-//we can make clean the routes by defing the logic in the controller
-//in router we only have to difine the route
+// Route to update UPI ID for a user
+router.post('/user/:userId/upi', updateUpiId);
+
+module.exports = router;

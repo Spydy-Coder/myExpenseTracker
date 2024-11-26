@@ -15,19 +15,20 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  trips: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Trip' }], // Array to store trip references
+  upiId: { // New field for UPI ID
+    type: String,
+    default: '', // Can be empty initially
+  },
+  trips: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Trip' }],
 }, { timestamps: true });
 
+// Generate JWT token
 UserSchema.methods.generateToken = async function() {
   try {
     return jwt.sign(
-      {
-        email: this.email
-      },
+      { email: this.email },
       process.env.JWT_KEY,
-      {
-        expiresIn: "10d",
-      }
+      { expiresIn: "10d" }
     );
   } catch (error) {
     console.log(error);

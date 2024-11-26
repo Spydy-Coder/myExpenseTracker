@@ -4,6 +4,8 @@ import {
   Typography,
   Fab,
   CircularProgress,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ExpensesCards from "./ExpensesCards";
@@ -13,6 +15,10 @@ function TripContent() {
   const [isSplitExpenseFormOpen, setSplitExpenseFormOpen] = useState(false);
   const [expensesUpdated, setExpensesUpdated] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Get current theme and check if it's dark mode
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
 
   // Handles opening the Split Expense Form
   const handleCreateExpense = () => {
@@ -52,17 +58,27 @@ function TripContent() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "flex-start",
-        height: "100vh",
-        p: 3,
+        p: { xs: 2, sm: 3 }, // Responsive padding
         gap: 3,
-        backgroundColor: "#f5f5f5", // Light background for better readability
+        backgroundColor: isDarkMode ? "#121212" : "#f5f5f5", // Dark mode background color
+        color: isDarkMode ? "#ffffff" : "#000000", // Light text on dark background
         borderRadius: 2,
         boxShadow: 3,
         position: "relative",
+        height: "100vh", // Full height for the content
+        overflowY: "auto", // Allow scrolling if content exceeds the viewport height
       }}
     >
       {/* Title Section */}
-      <Typography variant="h4" sx={{ mb: 2, textAlign: "center", fontWeight: "bold" }}>
+      <Typography
+        variant="h4"
+        sx={{
+          mb: 2,
+          textAlign: "center",
+          fontWeight: "bold",
+          fontSize: { xs: "1.5rem", sm: "2rem", md: "2.5rem" }, // Responsive font size
+        }}
+      >
         Trip Expenses
       </Typography>
 
@@ -70,11 +86,13 @@ function TripContent() {
       <Box
         sx={{
           width: "100%",
-          height:"100vh",
           display: "flex",
+          flexDirection: { xs: "column", sm: "row" }, // Stack vertically on small screens
           flexWrap: "wrap",
           justifyContent: "center",
           gap: 3,
+          overflowY: "auto", // Allow scrolling for cards if needed
+          maxHeight: { xs: "auto", sm: "calc(100vh - 120px)" }, // Responsive max height for larger screens
         }}
       >
         <ExpensesCards key={expensesUpdated} />
@@ -84,7 +102,7 @@ function TripContent() {
       <Box
         sx={{
           position: "fixed",
-          bottom: { xs: 16, sm: 30 }, // Responsive positioning
+          bottom: { xs: 16, sm: 30 }, // Responsive positioning for small screens and up
           right: { xs: 16, sm: 30 },
         }}
       >
@@ -92,6 +110,12 @@ function TripContent() {
           color="primary"
           aria-label="Add Expense"
           onClick={handleCreateExpense}
+          sx={{
+            boxShadow: 3,
+            zIndex: 1000, // Ensure the FAB stays on top of other elements
+            width: { xs: 56, sm: 64 }, // Adjust FAB size for small screens
+            height: { xs: 56, sm: 64 },
+          }}
         >
           <AddIcon />
         </Fab>

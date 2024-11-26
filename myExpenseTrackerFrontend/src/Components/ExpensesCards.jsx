@@ -14,6 +14,7 @@ import {
   TableRow,
   Paper,
   Button,
+  Alert,
 } from "@mui/material";
 import { useParams } from "react-router-dom";
 
@@ -21,6 +22,7 @@ function ExpensesCards() {
   const [expensesData, setExpensesData] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(""); // State for success message
   const { tripId } = useParams();
   const currentUserId = localStorage.getItem("userId");
 
@@ -53,6 +55,17 @@ function ExpensesCards() {
     fetchExpenses();
   }, [tripId, currentUserId]);
 
+  // Clear alerts after 4 seconds
+  useEffect(() => {
+    if (successMessage || error) {
+      const timer = setTimeout(() => {
+        setSuccessMessage("");
+        setError("");
+      }, 4000); // Set the timeout to 4 seconds
+      return () => clearTimeout(timer); // Cleanup the timer on component unmount or when message changes
+    }
+  }, [successMessage, error]);
+
   // Sort expenses by the size of table data
   const sortExpensesBySize = (expensesData) => {
     return Object.keys(expensesData)
@@ -65,8 +78,8 @@ function ExpensesCards() {
         a.userId === currentUserId
           ? -1
           : b.userId === currentUserId
-            ? 1
-            : b.totalExpenses - a.totalExpenses
+          ? 1
+          : b.totalExpenses - a.totalExpenses
       );
   };
 
@@ -92,11 +105,25 @@ function ExpensesCards() {
         throw new Error(`Error: ${response.status}`);
       }
 
-      alert("Request sent successfully!");
+      setSuccessMessage("Request sent successfully!"); // Set success message
     } catch (err) {
-      alert("Failed to send request.");
+      setError("Failed to send request.");
       console.error(err);
     }
+  };
+
+  const copyToClipboard = (userEmail, expenses, totalAmount) => {
+    const tableData = `User: ${userEmail}
+Category | Amount | Description
+${expenses
+  .map(
+    (expense) => `${expense.category} | ₹${expense.amount} | ${expense.desc}`
+  )
+  .join("\n")}
+Total: ₹${totalAmount}`;
+
+    navigator.clipboard.writeText(tableData);
+    setSuccessMessage("Table copied to clipboard!"); // Set success message
   };
 
   if (loading) {
@@ -130,20 +157,6 @@ function ExpensesCards() {
 
   const sortedExpenses = sortExpensesBySize(expensesData);
 
-  const copyToClipboard = (userEmail, expenses, totalAmount) => {
-    const tableData = `User: ${userEmail}
-Category | Amount | Description
-${expenses
-  .map(
-    (expense) => `${expense.category} | ₹${expense.amount} | ${expense.desc}`
-  )
-  .join("\n")}
-Total: ₹${totalAmount}`;
-
-    navigator.clipboard.writeText(tableData);
-    alert("Table copied to clipboard!");
-  };
-
   return (
     <Box
       sx={{
@@ -155,6 +168,26 @@ Total: ₹${totalAmount}`;
         p: 3,
       }}
     >
+      {/* Display success alert if message is set */}
+      {successMessage && (
+        <Alert
+          severity="success"
+          sx={{ position: "absolute", top: 20, width: "100%", zIndex: 1 }}
+        >
+          {successMessage}
+        </Alert>
+      )}
+
+      {/* Display error alert if error exists */}
+      {error && (
+        <Alert
+          severity="error"
+          sx={{ position: "absolute", top: 20, width: "100%", zIndex: 1 }}
+        >
+          {error}
+        </Alert>
+      )}
+
       {sortedExpenses.map(({ userDetails: user, expenses, userId }) => {
         const totalAmount = expenses.reduce(
           (acc, expense) => acc + expense.amount,
@@ -261,23 +294,25 @@ Total: ₹${totalAmount}`;
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
-                  gap: "16px"
+                  gap: "16px",
                 }}
-              > {userId !== currentUserId ?  <Button
-                sx={{
-                  backgroundColor: "#219ebc",
-                  color: "#FFF",
-                  fontWeight: "bold",
-                  "&:hover": {
-                    backgroundColor: "#126782",
-                  },
-                }}
-                variant="contained"
-                onClick={() => sendRequest(userId, totalAmount, expenses)}
               >
-                Send Request
-              </Button> :null}
-               
+                {userId !== currentUserId ? (
+                  <Button
+                    sx={{
+                      backgroundColor: "#219ebc",
+                      color: "#FFF",
+                      fontWeight: "bold",
+                      "&:hover": {
+                        backgroundColor: "#126782",
+                      },
+                    }}
+                    variant="contained"
+                    onClick={() => sendRequest(userId, totalAmount, expenses)}
+                  >
+                    Send Request
+                  </Button>
+                ) : null}
 
                 <Button
                   sx={{
@@ -289,11 +324,9 @@ Total: ₹${totalAmount}`;
                     },
                   }}
                   variant="contained"
-                  onClick={() =>
-                    copyToClipboard(user.email, expenses, totalAmount)
-                  }
+                  onClick={() => copyToClipboard(user.email, expenses, totalAmount)}
                 >
-                  Copy Expense
+                  Copy Table
                 </Button>
               </Box>
             </CardContent>
