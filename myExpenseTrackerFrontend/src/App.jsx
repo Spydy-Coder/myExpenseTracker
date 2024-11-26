@@ -1,6 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import  {AuthProvider } from "./Auth/AuthProvider";
+import { AuthProvider } from "./Auth/AuthProvider";
 import ProtectedRoute from "./Auth/ProtectedRoute ";
 import UserDashboard from "./Pages/UserDashboard";
 import "./App.css";
@@ -9,6 +9,7 @@ import SignUp from "./Pages/SignUp";
 import HomePage from "./Pages/HomePage";
 import DashboardContent from "./Components/DashboardContent";
 import TripContent from "./Components/TripContent";
+import ExpenseRequest from "./Components/ExpenseRequest";
 
 function App() {
   return (
@@ -27,14 +28,21 @@ function App() {
               </ProtectedRoute>
             }
           /> */}
-          
-        {/* Dashboard Layout */}
-        <Route path="/dashboard/*" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>}>
-          {/* Nested Routes */}
-          <Route path=":userId" element={<DashboardContent />} />
-          <Route path="trip/:tripId" element={<TripContent />} />
-        </Route>
-      
+
+          {/* Dashboard Layout */}
+          <Route
+            path="/dashboard/*"
+            element={
+              <ProtectedRoute>
+                <UserDashboard />
+              </ProtectedRoute>
+            }
+          >
+            {/* Nested Routes */}
+            <Route path=":userId" element={<DashboardContent />} />
+            <Route path="trip/:tripId" element={<TripContent />} />
+            <Route path="expenserequest" element={<ExpenseRequest />} />
+          </Route>
         </Routes>
       </AuthProvider>
     </Router>

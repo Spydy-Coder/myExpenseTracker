@@ -16,6 +16,7 @@ export default function CreateTripForm({ open, onClose }) {
   const [selectedDate, setSelectedDate] = useState(null);
   const [openUnique, setOpenUnique] = useState(false);
   const [uniqueId, setUniqueId] = useState("");
+  const apiUrl = import.meta.env.VITE_API_URL;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -34,7 +35,7 @@ export default function CreateTripForm({ open, onClose }) {
     formJson.date = selectedDate ? selectedDate.toISOString() : null; // Convert to ISO format for consistency
 
     try {
-      const response = await fetch("http://localhost:5000/trip/create", {
+      const response = await fetch(`${apiUrl}/trip/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

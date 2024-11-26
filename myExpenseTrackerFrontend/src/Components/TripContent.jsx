@@ -1,10 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Box,
-  Typography,
-  Fab,
-  CircularProgress,
-} from "@mui/material";
+import { Box, Typography, Fab, CircularProgress } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ExpensesCards from "./ExpensesCards";
 import SplitExpenseForm from "./SplitExpenseForm";
@@ -19,17 +14,18 @@ function TripContent() {
     setSplitExpenseFormOpen(true);
   };
 
-  // Handles closing the Split Expense Form
+  // Handles closing the Split Expense Form and triggering re-fetch for updated expenses
   const closeSplitExpenseForm = () => {
     setSplitExpenseFormOpen(false);
-    setExpensesUpdated(!expensesUpdated); // Trigger re-fetch for updated expenses
+    setExpensesUpdated((prev) => !prev);
   };
 
-  // Simulating loading (if necessary for data fetching)
+  // Simulates loading state (replace this with real data fetching logic)
   useEffect(() => {
-    setLoading(false); // You can replace this with logic to fetch data
+    setLoading(false); // Simulate data loading (update based on `expensesUpdated`)
   }, [expensesUpdated]);
 
+  // Display loading spinner while data is being fetched
   if (loading) {
     return (
       <Box
@@ -52,7 +48,9 @@ function TripContent() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "flex-start",
-        height: "100vh",
+        minHeight:"100%",
+        height: "auto",
+
         p: 3,
         gap: 3,
         backgroundColor: "#f5f5f5", // Light background for better readability
@@ -62,23 +60,19 @@ function TripContent() {
       }}
     >
       {/* Title Section */}
-      <Typography variant="h4" sx={{ mb: 2, textAlign: "center", fontWeight: "bold" }}>
+      <Typography
+        variant="h4"
+        sx={{
+          mb: 2,
+          textAlign: "center",
+          fontWeight: "bold",
+        }}
+      >
         Trip Expenses
       </Typography>
 
       {/* Expenses Cards */}
-      <Box
-        sx={{
-          width: "100%",
-          height:"100vh",
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "center",
-          gap: 3,
-        }}
-      >
-        <ExpensesCards key={expensesUpdated} />
-      </Box>
+      <ExpensesCards key={expensesUpdated} />
 
       {/* Floating Action Button */}
       <Box

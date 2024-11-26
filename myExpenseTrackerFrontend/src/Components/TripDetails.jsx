@@ -8,12 +8,13 @@ const TripDetails = () => {
     
     const [trips, setTrips] = useState([]);
     const userId = localStorage.getItem("userId");
+    const apiUrl = import.meta.env.VITE_API_URL;
   
     useEffect(() => {
       const fetchTrips = async () => {
         try {
           const response = await fetch(
-            `http://localhost:5000/trip/user/${userId}`
+            `${apiUrl}/trip/user/${userId}`
           );
           if (!response.ok) {
             throw new Error("Failed to fetch trips");
@@ -41,7 +42,8 @@ const TripDetails = () => {
               display: "flex",
               flexWrap: "wrap",
               justifyContent: "center",
-              gap: "20px",
+              alignItems:"center",
+              gap: "30px",
             }}
           >
             {trips.map((trip) => (
