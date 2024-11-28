@@ -34,6 +34,10 @@ const expenseRequestSchema = new mongoose.Schema({
       desc: {
         type: String,
         trim: true, // Example: 'morning breakfast'
+      },
+      paid:{
+        type:Boolean,
+        default: false
       }
     },
   ],
