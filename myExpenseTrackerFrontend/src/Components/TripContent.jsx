@@ -47,11 +47,11 @@ function TripContent() {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "flex-start",
-        minHeight:"100%",
+        justifyContent: "center",
         height: "auto",
+        width:"auto",
 
-        p: 3,
+        py: 3,
         gap: 3,
         backgroundColor: "#f5f5f5", // Light background for better readability
         borderRadius: 2,
@@ -68,7 +68,7 @@ function TripContent() {
           fontWeight: "bold",
         }}
       >
-        Trip Expenses
+        Who Owes You?
       </Typography>
 
       {/* Expenses Cards */}

@@ -113,19 +113,18 @@ const saveExpenseRequest = async (req, res) => {
       ) {
         return res.status(400).json({ message: "Invalid request data" });
       }
-
   
-      // Perform a single upsert operation for the entire expenses array
-      const result = await ExpenseRequest.findOneAndUpdate(
+      // Perform a single upsert operation for the user's expenses
+      const resultUser = await ExpenseRequest.findOneAndUpdate(
         {
           user_id: user_id, // Match by user_id
           trip_id: trip_id, // Match by trip_id
-          payee:payee
+          payee: payee,
         },
         {
-          $set: { 
-            expenses: expenses, // Update expenses
-            total_money,        // Update total money
+          $set: {
+            expenses: expenses, // Set expenses only if the document is inserted
+            total_money, // Set total money only if the document is inserted
           },
         },
         {
@@ -135,9 +134,37 @@ const saveExpenseRequest = async (req, res) => {
         }
       );
   
+      // Find the payee's expense request, if it exists, otherwise set to 0
+      const resultPayee = await ExpenseRequest.findOne({
+        user_id: payee, // Match by payee's user_id
+        trip_id: trip_id, // Match by trip_id
+        payee: user_id, // Match by the original user_id as the payee
+      });
+  
+      // If the payee's document does not exist, set resultPayee to 0
+      const totalMoneyPayee = resultPayee ? resultPayee.total_money : 0;
+  
+      // Calculate the difference between total_money for user and payee
+      const moneyLeft = -resultUser.total_money + totalMoneyPayee;
+  
+      // Update the "money_left" field in the user's document
+      await ExpenseRequest.findOneAndUpdate(
+        { user_id: user_id, trip_id: trip_id, payee: payee },
+        { $set: { money_left: moneyLeft,moneyToBeReceive: totalMoneyPayee } }
+      );
+  
+      // Optionally, update the payee document too if needed, use -moneyLeft
+      if (resultPayee) {
+        await ExpenseRequest.findOneAndUpdate(
+          { user_id: payee, trip_id: trip_id, payee: user_id },
+          { $set: { money_left: -moneyLeft,moneyToBeReceive:resultUser.total_money } }
+        );
+      }
+  
+      // Send the response with saved data
       res.status(200).json({
         message: "Expenses Request saved successfully!",
-        data: result,
+        data: resultUser,
       });
     } catch (error) {
       console.error("Error saving expenses request:", error);
@@ -145,79 +172,75 @@ const saveExpenseRequest = async (req, res) => {
     }
   };
   
-
 const getExpensesRequestByUser = async (req, res) => {
-    try {
-      const { userId } = req.params;
-  
-      // Find all expenses for the given userId, populate payee and trip_id details
-      const expensesData = await ExpenseRequest.find({ user_id: userId })
-        .populate("payee", "id username") // Populate payee's username
-        .populate("trip_id", "uniqueId tripName"); // Populate trip name
-  
-      res.status(200).json({
-        message: "Expenses Request fetched successfully",
-        data: expensesData,
-      });
-    } catch (error) {
-      console.error("Error fetching expenses:", error);
-      res.status(500).json({ message: "Error fetching expenses", error });
-    }
-  };
+  try {
+    const { userId } = req.params;
 
-  // Sample route in your backend
-  const saveMarkExpensesPaid = async (req, res) => {
-    const { expenses, currentUserId, payee, trip_id } = req.body;
-  
-    try {
-      for (const expense of expenses) {
-   
-        // Perform the update
-        const result = await Expense.updateOne(
-          {
-            user_id: currentUserId, // Match user ID
-            trip_id: trip_id, // Match trip ID
-        
-            "expenses._id": expense._id, // Match the specific expense by its _id
-          },
-          {
-            $set: {
-              "expenses.$.paid": true, // Update paid to true
-            },
-          }
-        );
-
-        const resultRequest = await ExpenseRequest.updateOne(
-            {
-              user_id: currentUserId, // Match user ID
-              trip_id: trip_id, // Match trip ID
-              payee: payee._id,
-          
-              "expenses._id": expense._id, // Match the specific expense by its _id
-            },
-            {
-              $set: {
-                "expenses.$.paid": true, // Update paid to true
-              },
-            }
-          );
+    // Step 1: Fetch all expenses for the given userId
+    const expensesData = await ExpenseRequest.find({ user_id: userId })
+      .populate("payee", "id username") // Populate payee details
+      .populate("trip_id", "uniqueId tripName"); // Populate trip details
     
-      }
-  
-      res.status(200).json({ message: "Expenses marked as paid" });
-    } catch (error) {
-      console.error("Error marking expenses as paid:", error);
-      res.status(500).json({ message: "Error marking expenses as paid", error });
+    res.status(200).json({
+      message: "Expenses Request fetched successfully",
+      data: expensesData,
+    });
+  } catch (error) {
+    console.error("Error fetching expenses:", error);
+    res.status(500).json({ message: "Error fetching expenses", error });
+  }
+};
+
+const saveMarkExpensesPaid = async (req, res) => {
+  const { expenses, currentUserId, payee, trip_id } = req.body;
+
+  try {
+    for (const expense of expenses) {
+      // Perform the update
+      const result = await Expense.updateOne(
+        {
+          user_id: currentUserId, // Match user ID
+          trip_id: trip_id, // Match trip ID
+
+          "expenses._id": expense._id, // Match the specific expense by its _id
+        },
+        {
+          $set: {
+            "expenses.$.paid": true, // Update paid to true
+          },
+        }
+      );
+
+      const resultRequest = await ExpenseRequest.updateOne(
+        {
+          user_id: currentUserId, // Match user ID
+          trip_id: trip_id, // Match trip ID
+          payee: payee._id,
+
+          "expenses._id": expense._id, // Match the specific expense by its _id
+        },
+        {
+          $set: {
+            "expenses.$.paid": true, // Update paid to true
+            total_money: 0,
+            moneyToBeReceive: 0,
+            money_left: 0
+          },
+        }
+      );
     }
-  };
-  
-  
-  
+
+    res.status(200).json({ message: "Expenses marked as paid" });
+  } catch (error) {
+    console.error("Error marking expenses as paid:", error);
+    res.status(500).json({ message: "Error marking expenses as paid", error });
+  }
+};
 
 module.exports = {
   saveExpense,
   getExpensesByTripAndUser,
   saveExpenseRequest,
   getExpensesRequestByUser,
-  saveMarkExpensesPaid
+  saveMarkExpensesPaid,
 };

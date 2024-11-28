@@ -38,9 +38,20 @@ const expenseRequestSchema = new mongoose.Schema({
       paid:{
         type:Boolean,
         default: false
-      }
+      },
+      
     },
   ],
+  money_left: {
+    type: Number,
+    default:0,
+    min: 0, // Ensure no negative amounts
+  },
+  moneyToBeReceive: {
+    type: Number,
+    default:0,
+    min: 0, // Ensure no negative amounts
+  },
 });
 
 const ExpenseRequest = mongoose.model("ExpenseRequest", expenseRequestSchema);

@@ -196,7 +196,7 @@ export default function SplitExpenseForm({ open, onClose }) {
         amount: Number(amounts[id]),
       })),
     };
-    console.log(expenseData)
+  
     fetch(`${apiUrl}/expense/create`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
