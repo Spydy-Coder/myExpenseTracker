@@ -25,11 +25,12 @@ const JoinTrip = ({ open, onClose }) => {
       return () => clearTimeout(timer); // Cleanup the timer on component unmount
     }
   }, [successMessage, error]);
+  const apiUrl = import.meta.env.VITE_API_URL;
 
   const handleJoinTrip = async () => {
     const userId = localStorage.getItem("userId");
     try {
-      const response = await fetch("http://localhost:5000/trip/join", {
+      const response = await fetch(`${apiUrl}/trip/join`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tripCode, userId }),
@@ -64,13 +65,33 @@ const JoinTrip = ({ open, onClose }) => {
         />
         {/* Display success message as an Alert */}
         {successMessage && (
-          <Alert severity="success" sx={{ mt: 2 }}>
+          <Alert
+            severity="success"
+            sx={{
+              position: "fixed",
+              top: 70,
+              width: "50%",
+              zIndex: 100,
+              alignContent: "center",
+              alignItems: "center",
+            }}
+          >
             {successMessage}
           </Alert>
         )}
         {/* Display error message as an Alert */}
         {error && (
-          <Alert severity="error" sx={{ mt: 2 }}>
+          <Alert
+            severity="error"
+            sx={{
+              position: "fixed",
+              top: 70,
+              width: "50%",
+              zIndex: 100,
+              alignContent: "center",
+              alignItems: "center",
+            }}
+          >
             {error}
           </Alert>
         )}

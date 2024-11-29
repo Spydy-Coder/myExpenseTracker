@@ -5,19 +5,21 @@ import { Box, Modal, Typography, TextField, Button } from "@mui/material";
 const UpiForm = ({ open, onClose }) => {
   const [upiId, setUpiId] = useState("");
   const [error, setError] = useState("");
+  const apiUrl = import.meta.env.VITE_API_URL 
 
   useEffect(() => {
     // Fetch existing UPI ID from the backend (if any)
     const fetchUpiId = async () => {
       try {
         const userId = localStorage.getItem("userId");
-        const response = await fetch(`http://localhost:5000/user/${userId}/upi`, {
+        const response = await fetch(`${apiUrl}/api/auth/user/upi/${userId}`, {
           method: "GET",  // Use GET method to fetch UPI ID
           headers: { "Content-Type": "application/json" },
         });
         if (response.ok) {
           const data = await response.json();
           setUpiId(data.upiId || "");
+          setError("")
         } else {
           throw new Error("Failed to fetch UPI ID");
         }
@@ -35,7 +37,7 @@ const UpiForm = ({ open, onClose }) => {
   const handleSave = async () => {
     try {
       const userId = localStorage.getItem("userId");
-      const response = await fetch(`http://localhost:5000/user/${userId}/upi`, {
+      const response = await fetch(`${apiUrl}/api/auth/user/upi/${userId}`, {
         method: "POST",  // Use POST method to update UPI ID
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ upiId }),
@@ -43,6 +45,7 @@ const UpiForm = ({ open, onClose }) => {
 
       if (response.ok) {
         onClose(); // Close form after successful save
+        setError("")
       } else {
         throw new Error("Failed to update UPI ID");
       }

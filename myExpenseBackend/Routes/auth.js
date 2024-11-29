@@ -9,9 +9,9 @@ router.post('/register', registerUser);
 router.post('/login', loginUser);
 
 // Route to fetch UPI ID for a user
-router.get('/user/:userId/upi', fetchUpiId);
+router.get('/user/upi/:userId', fetchUpiId);
 
 // Route to update UPI ID for a user
-router.post('/user/:userId/upi', updateUpiId);
+router.post('/user/upi/:userId', updateUpiId);
 
 module.exports = router;

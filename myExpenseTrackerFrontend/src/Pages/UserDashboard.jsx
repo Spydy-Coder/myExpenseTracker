@@ -19,12 +19,14 @@ import JoinTrip from "../Components/JoinTrip"
 import UpiForm from "../Components/UpiForm";
 import { Link, Outlet } from "react-router-dom";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
+import RequestPageIcon from '@mui/icons-material/RequestPage';
+import RefreshIcon from '@mui/icons-material/Refresh';
 
 const demoTheme = createTheme({
   cssVariables: {
     colorSchemeSelector: "data-toolpad-color-scheme",
   },
-  colorSchemes: { light: true, dark: true },
+  colorSchemes: { light: true, dark: false },
   breakpoints: {
     values: {
       xs: 0,
@@ -35,6 +37,8 @@ const demoTheme = createTheme({
     },
   },
 });
+
+
 function UserDashboard(props) {
   const navigate = useNavigate();
   const { logout } = useAuth();
@@ -44,6 +48,10 @@ function UserDashboard(props) {
   const [isCreateTripFormOpen, setIsCreateTripFormOpen] = useState(false);
   const [isJoinTripFormOpen, setIsJoinTripFormOpen] = useState(false);
   const [isUpiFormOpen, setIsUpiFormOpen] = useState(false); 
+  const handleRefresh = async () => {
+    navigate(0);
+  };
+
 
   const handleOpenCreateTripForm = () => {
     setIsCreateTripFormOpen(true);
@@ -87,6 +95,20 @@ function UserDashboard(props) {
       ),
     },
     {
+      segment: "expenserequest",
+      title: (
+        <Typography onClick={() => navigate(`expenserequest`)}>
+          Requests
+        </Typography>
+      ),
+      icon: (
+        <RequestPageIcon
+          style={{ cursor: "pointer" }}
+          onClick={() => navigate(`expenserequest`)}
+        />
+      ),
+    },
+    {
       kind: "divider",
     },
     {
@@ -111,6 +133,16 @@ function UserDashboard(props) {
           onClick={handleOpenJoinTripForm}
           style={{ cursor: "pointer" }}
         />
+      ),
+    },
+    {
+      segment: "refresh",
+      title: <Typography onClick={handleRefresh}>Refresh</Typography>,
+      icon: (
+        <RefreshIcon
+        onClick={handleRefresh}
+        style={{ cursor: "pointer" }}
+      />
       ),
     },
     {

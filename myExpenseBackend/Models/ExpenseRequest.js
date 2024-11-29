@@ -6,6 +6,11 @@ const expenseRequestSchema = new mongoose.Schema({
     ref: "User", // Assuming you have a User model
     required: true,
   },
+  payee: {
+    type: mongoose.Schema.Types.ObjectId, // Reference to the user
+    ref: "User", // Assuming you have a User model
+    required: true,
+  },
   trip_id: {
     type: String, // Reference to the trip
     required: true,
@@ -29,9 +34,24 @@ const expenseRequestSchema = new mongoose.Schema({
       desc: {
         type: String,
         trim: true, // Example: 'morning breakfast'
-      }
+      },
+      paid:{
+        type:Boolean,
+        default: false
+      },
+      
     },
   ],
+  money_left: {
+    type: Number,
+    default:0,
+    min: 0, // Ensure no negative amounts
+  },
+  moneyToBeReceive: {
+    type: Number,
+    default:0,
+    min: 0, // Ensure no negative amounts
+  },
 });
 
 const ExpenseRequest = mongoose.model("ExpenseRequest", expenseRequestSchema);

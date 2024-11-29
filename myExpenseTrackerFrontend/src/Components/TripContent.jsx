@@ -10,11 +10,18 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import ExpensesCards from "./ExpensesCards";
 import SplitExpenseForm from "./SplitExpenseForm";
+import { useParams } from "react-router-dom";
+import ExpensePopup from "./ExpensePopup";
+import CustomSpeedDial from "./CustomSpeedDial";
+import { grey } from "@mui/material/colors";
 
 function TripContent() {
   const [isSplitExpenseFormOpen, setSplitExpenseFormOpen] = useState(false);
+  const [isExpensePopup, setIsExpensePopup] = useState(false);
   const [expensesUpdated, setExpensesUpdated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const { tripId } = useParams();
+  const userId = localStorage.getItem("userId");
 
   // Get current theme and check if it's dark mode
   const theme = useTheme();
@@ -24,18 +31,25 @@ function TripContent() {
   const handleCreateExpense = () => {
     setSplitExpenseFormOpen(true);
   };
-
-  // Handles closing the Split Expense Form
-  const closeSplitExpenseForm = () => {
-    setSplitExpenseFormOpen(false);
-    setExpensesUpdated(!expensesUpdated); // Trigger re-fetch for updated expenses
+  const handleShowTotalExpense = () => {
+    setIsExpensePopup(true);
   };
 
-  // Simulating loading (if necessary for data fetching)
+  // Handles closing the Split Expense Form and triggering re-fetch for updated expenses
+  const closeSplitExpenseForm = () => {
+    setSplitExpenseFormOpen(false);
+    setExpensesUpdated((prev) => !prev);
+  };
+  const closeExpensePopup = () => {
+    setIsExpensePopup(false);
+  };
+
+  // Simulates loading state (replace this with real data fetching logic)
   useEffect(() => {
-    setLoading(false); // You can replace this with logic to fetch data
+    setLoading(false); // Simulate data loading (update based on `expensesUpdated`)
   }, [expensesUpdated]);
 
+  // Display loading spinner while data is being fetched
   if (loading) {
     return (
       <Box
@@ -53,75 +67,77 @@ function TripContent() {
 
   return (
     <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "flex-start",
-        p: { xs: 2, sm: 3 }, // Responsive padding
-        gap: 3,
-        backgroundColor: isDarkMode ? "#121212" : "#f5f5f5", // Dark mode background color
-        color: isDarkMode ? "#ffffff" : "#000000", // Light text on dark background
-        borderRadius: 2,
-        boxShadow: 3,
-        position: "relative",
-        height: "100vh", // Full height for the content
-        overflowY: "auto", // Allow scrolling if content exceeds the viewport height
-      }}
-    >
+    sx={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      height: "auto",
+      width: "auto",
+
+      py: 3,
+      gap: 3,
+      backgroundColor: "#f5f5f5", // Light background for better readability
+      borderRadius: 2,
+      boxShadow: 3,
+      position: "relative",
+    }}
+  >
       {/* Title Section */}
       <Typography
-        variant="h4"
+        variant="h4" // Defines the size and style of the heading
+        component="h1" // Semantic HTML element
         sx={{
-          mb: 2,
-          textAlign: "center",
-          fontWeight: "bold",
-          fontSize: { xs: "1.5rem", sm: "2rem", md: "2.5rem" }, // Responsive font size
+          color: "primary.main", // Use theme's primary color
+          textAlign: "center", // Center-align the text
+          fontWeight: "bold", // Make the text bold
+          marginTop: 2, // Add margin to the top
         }}
       >
-        Trip Expenses
+        Who Owes You?
+      </Typography>
+      <Typography
+        variant="caption"
+        sx={{
+          display: "block",
+          color: grey[700],
+
+          mx: 2,
+          textAlign: "center",
+          fontStyle: "italic",
+        }}
+        gutterBottom // Adds spacing below the heading
+      >
+        * Track and manage expenses effortlessly – see who owes you and ensure
+        every split is settled smoothly.
       </Typography>
 
       {/* Expenses Cards */}
-      <Box
-        sx={{
-          width: "100%",
-          display: "flex",
-          flexDirection: { xs: "column", sm: "row" }, // Stack vertically on small screens
-          flexWrap: "wrap",
-          justifyContent: "center",
-          gap: 3,
-          overflowY: "auto", // Allow scrolling for cards if needed
-          maxHeight: { xs: "auto", sm: "calc(100vh - 120px)" }, // Responsive max height for larger screens
-        }}
-      >
-        <ExpensesCards key={expensesUpdated} />
-      </Box>
+      <ExpensesCards key={expensesUpdated} />
 
       {/* Floating Action Button */}
       <Box
         sx={{
           position: "fixed",
-          bottom: { xs: 16, sm: 30 }, // Responsive positioning for small screens and up
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+          bottom: { xs: 16, sm: 30 }, // Responsive positioning
           right: { xs: 16, sm: 30 },
         }}
       >
-        <Fab
-          color="primary"
-          aria-label="Add Expense"
-          onClick={handleCreateExpense}
-          sx={{
-            boxShadow: 3,
-            zIndex: 1000, // Ensure the FAB stays on top of other elements
-            width: { xs: 56, sm: 64 }, // Adjust FAB size for small screens
-            height: { xs: 56, sm: 64 },
-          }}
-        >
-          <AddIcon />
-        </Fab>
+        <CustomSpeedDial
+          handleCreateExpense={handleCreateExpense}
+          handleShowTotalExpense={handleShowTotalExpense}
+        />
       </Box>
+      <ExpensePopup
+        tripId={tripId}
+        userId={userId}
+        open={isExpensePopup}
+        onClose={closeExpensePopup}
+      />
 
-      {/* Split Expense Form Modal */}
       <SplitExpenseForm
         open={isSplitExpenseFormOpen}
         onClose={closeSplitExpenseForm}
