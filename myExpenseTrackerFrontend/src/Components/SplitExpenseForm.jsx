@@ -196,7 +196,7 @@ export default function SplitExpenseForm({ open, onClose }) {
         amount: Number(amounts[id]),
       })),
     };
-    console.log(expenseData)
+  
     fetch(`${apiUrl}/expense/create`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -221,7 +221,25 @@ export default function SplitExpenseForm({ open, onClose }) {
 
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth sx={{
+      overflowX:"hidden",
+      overflowY:"hidden",
+      "&::-webkit-scrollbar": {
+        width: "4px", // Width of the vertical scrollbar
+        height: "4px", // Height of the horizontal scrollbar
+      },
+      "&::-webkit-scrollbar-thumb": {
+        backgroundColor: "#c1c1c1", // Scrollbar thumb color
+        borderRadius: "4px", // Rounded scrollbar thumb
+        "&:hover": {
+          backgroundColor: "#a0a0a0", // Darker color on hover
+        },
+      },
+      "&::-webkit-scrollbar-track": {
+        backgroundColor: "#f1f1f1", // Scrollbar track color
+        borderRadius: "4px",
+      },
+    }}>
       <DialogTitle>Split Money</DialogTitle>
       <form onSubmit={handleSubmit}>
         <DialogContent>

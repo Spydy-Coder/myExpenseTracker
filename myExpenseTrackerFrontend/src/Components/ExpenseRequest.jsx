@@ -6,9 +6,9 @@ import {
   Divider,
   Box,
   CircularProgress,
-  Avatar,
+  Button,
 } from "@mui/material";
-import { grey } from "@mui/material/colors";
+import { grey, red, green, blue } from "@mui/material/colors";
 
 function ExpenseRequest() {
   const userId = localStorage.getItem("userId");
@@ -17,37 +17,61 @@ function ExpenseRequest() {
   const [error, setError] = useState(null);
   const apiUrl = import.meta.env.VITE_API_URL;
 
-  // Fetch expense requests on component mount
-  useEffect(() => {
-    const fetchExpenseRequests = async () => {
-      try {
-        const response = await fetch(
-          `${apiUrl}/expense/requests/${userId}`,
-          {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-          }
-        );
+  const fetchExpenseRequests = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${apiUrl}/expense/requests/${userId}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const result = await response.json();
-        setExpenseRequests(result.data); // Assuming the backend sends data in `result.data`
-        console.log(result.data);
-      } catch (err) {
-        setError("Failed to fetch expense requests.");
-        console.error(err);
-      } finally {
-        setLoading(false);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    };
 
+      const result = await response.json();
+      setExpenseRequests(result.data);
+    } catch (err) {
+      setError("Failed to fetch expense requests.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchExpenseRequests();
   }, [userId]);
 
-  // Render a loading spinner while data is being fetched
+  const handleMarkAsPaid = async (tripId, payee, expenses) => {
+    const currentUserId = localStorage.getItem("userId");
+
+    try {
+      const response = await fetch(`${apiUrl}/expense/markAllPaid`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          currentUserId,
+          trip_id: tripId,
+          payee,
+          expenses: expenses.map((expense) => ({
+            ...expense,
+            paid: true,
+          })),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      fetchExpenseRequests();
+    } catch (err) {
+      setError("Failed to mark expenses as paid.");
+      console.error(err);
+    }
+  };
+
   if (loading) {
     return (
       <Box
@@ -63,7 +87,6 @@ function ExpenseRequest() {
     );
   }
 
-  // Render an error message if data fetching fails
   if (error) {
     return (
       <Typography
@@ -79,7 +102,6 @@ function ExpenseRequest() {
     );
   }
 
-  // Render cards for each trip
   return (
     <Box
       sx={{
@@ -91,108 +113,179 @@ function ExpenseRequest() {
         p: 3,
       }}
     >
+        
       {expenseRequests.map((request) => (
         <Card
           key={request.trip_id}
           sx={{
-            minWidth: 300,
-            maxWidth: 400,
-            boxShadow: 6,
+            width: 320,
+            height: 500, // Fixed card height
+            boxShadow: 8,
             borderRadius: "16px",
             overflow: "hidden",
-            // backgroundColor: grey[50],
-            //  background: "linear-gradient(135deg, #ff9a9e, #fad0c4)",
-            // background: "linear-gradient(135deg, #a1c4fd, #c2e9fb)",
-            background: "linear-gradient(135deg, #a1c4fd, #c2e9fb)",
-
+            background: "linear-gradient(135deg, #f0f4ff, #e1e7ff)",
             transition: "transform 0.2s ease-in-out, box-shadow 0.2s",
             "&:hover": {
               transform: "scale(1.05)",
               boxShadow: 20,
             },
-            p: 2,
           }}
         >
-          <CardContent>
-            {/* Trip ID Heading */}
-            <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
-              <Avatar
-                sx={{
-                  bgcolor: "primary.main",
-                  width: 50,
-                  height: 50,
-                  fontSize: 24,
-                  fontWeight: "bold",
-                }}
-              >
-                {request.trip_id.charAt(0).toUpperCase()}
-              </Avatar>
+          <CardContent
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+              height: "100%",
+            }}
+          >
+            {/* Payment Status */}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                mb: 2,
+                backgroundColor: request.expenses.every(
+                  (expense) => expense.paid
+                )
+                  ? green[100]
+                  : red[100],
+                color: request.expenses.every((expense) => expense.paid)
+                  ? green[800]
+                  : red[800],
+                padding: "4px 8px",
+                borderRadius: "16px",
+                fontWeight: "bold",
+              }}
+            >
+              {request.expenses.every((expense) => expense.paid)
+                ? "Fully Paid"
+                : "Not Fully Paid"}
             </Box>
+
+            {/* Trip ID and Payee */}
             <Typography
-              variant="h5"
-              component="div"
-              gutterBottom
+              variant="h6"
               sx={{
                 fontWeight: "bold",
-                color: "#264653",
                 textAlign: "center",
-                mb: 1,
+                color: blue[800],
+                mb: 2,
               }}
             >
               Trip ID: {request.trip_id}
             </Typography>
             <Typography
-              variant="h6"
-              component="div"
-              gutterBottom
+              variant="subtitle1"
               sx={{
-                fontWeight: "bold",
-                color: "#264653",
                 textAlign: "center",
+                color: grey[700],
                 mb: 2,
               }}
             >
-              Payee: {request.payee.username}
+              <strong>Payee:</strong> {request.payee.username}
             </Typography>
             <Divider sx={{ mb: 2 }} />
 
-            {/* Total Money */}
+            {/* Expense Details */}
             <Typography variant="subtitle1" sx={{ mb: 1 }}>
-              <strong>Total Money:</strong> ₹{request.total_money}
+              <strong>To be Sent:</strong> ₹{request.total_money}
+            </Typography>
+            <Typography variant="subtitle1" sx={{ mb: 1 }}>
+              <strong>To be Received:</strong> ₹{request.moneyToBeReceive}
+            </Typography>
+            <Divider sx={{ mb: 2 }} />
+            <Typography
+              variant="subtitle1"
+              sx={{
+                textAlign: "center",
+                fontWeight: "bold",
+                color: grey[800],
+                mb: 2,
+              }}
+            >
+              {request.money_left > 0
+                ? "You will receive"
+                : "You will have to send"}{" "}
+              ₹{Math.abs(request.money_left)}
             </Typography>
 
-            {/* Expenses Details */}
-            <Typography variant="subtitle1" sx={{ mb: 1 }}>
-              <strong>Expenses:</strong>
-            </Typography>
-            {request.expenses.map((expense, index) => (
-              <Box
-                key={index}
-                sx={{ mb: 1, display: "flex", alignItems: "center", gap: 1 }}
+            {/* Expenses List */}
+            <Box
+              sx={{
+                maxHeight: "150px",
+                overflowY: "auto",
+                mb: 2,
+                pr: 1,
+                "&::-webkit-scrollbar": {
+                    width: "4px", // Width of the vertical scrollbar
+                    height: "4px", // Height of the horizontal scrollbar
+                  },
+                  "&::-webkit-scrollbar-thumb": {
+                    backgroundColor: "#c1c1c1", // Scrollbar thumb color
+                    borderRadius: "4px", // Rounded scrollbar thumb
+                    "&:hover": {
+                      backgroundColor: "#a0a0a0", // Darker color on hover
+                    },
+                  },
+                  "&::-webkit-scrollbar-track": {
+                    backgroundColor: "#f1f1f1", // Scrollbar track color
+                    borderRadius: "4px",
+                  },
+              }}
+            >
+              {request.expenses.map((expense, index) => (
+                <Typography
+                  key={index}
+                  variant="body2"
+                  sx={{
+                    color: grey[600],
+                    mb: 0.5,
+                    display: "flex",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  - {expense.category}: ₹{expense.amount} ({expense.desc})
+                  <span
+                    style={{
+                      color: expense.paid ? green[600] : red[600],
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {expense.paid ? "Paid" : "Unpaid"}
+                  </span>
+                </Typography>
+              ))}
+            </Box>
+
+            {/* Mark as Paid Button */}
+            <Box sx={{ textAlign: "center" }}>
+              <Button
+                variant="contained"
+                color="success"
+                onClick={() =>
+                  handleMarkAsPaid(
+                    request.trip_id,
+                    request.payee,
+                    request.expenses
+                  )
+                }
               >
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: "#555555",
-                    fontWeight: "bold",
-                    lineHeight: 1.5,
-                    flexShrink: 0, // Prevent category text from shrinking
-                  }}
-                >
-                  - {expense.category}: ₹{expense.amount}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: "#777777",
-                    fontStyle: "italic",
-                    flexGrow: 1, // Allow description text to take up remaining space
-                  }}
-                >
-                  ({expense.desc})
-                </Typography>
-              </Box>
-            ))}
+                Mark as Paid
+              </Button>
+              <Typography
+                variant="caption"
+                sx={{
+                  display: "block",
+                  color: grey[700],
+                  mt: 1,
+                  textAlign: "center",
+                  fontStyle: "italic",
+                }}
+              >
+                * Click this button after you've paid or received the amount.
+              </Typography>
+            </Box>
           </CardContent>
         </Card>
       ))}
