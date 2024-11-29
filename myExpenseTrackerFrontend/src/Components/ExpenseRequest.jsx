@@ -170,7 +170,7 @@ function ExpenseRequest() {
                 fontWeight: "bold",
                 textAlign: "center",
                 color: blue[800],
-                mb: 2,
+                mb: 1,
               }}
             >
               Trip ID: {request.trip_id}
@@ -180,10 +180,19 @@ function ExpenseRequest() {
               sx={{
                 textAlign: "center",
                 color: grey[700],
-                mb: 2,
               }}
             >
               <strong>Payee:</strong> {request.payee.username}
+            </Typography>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                textAlign: "center",
+                color: grey[700],
+                mb: 2,
+              }}
+            >
+              <strong>UPI ID:</strong> {request.payee.upiId ==='' ? 'Not Available':request.payee.upiId}
             </Typography>
             <Divider sx={{ mb: 2 }} />
 

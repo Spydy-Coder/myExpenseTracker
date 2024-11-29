@@ -10,10 +10,11 @@ import {
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CheckIcon from "@mui/icons-material/Check";
 
-const TripCard = ({ photo, tripName, description, date, codeToCopy }) => {
+const TripCard = ({ photo, tripName, description, date, codeToCopy, onCardClick }) => {
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = () => {
+  const handleCopy = (event) => {
+    event.stopPropagation(); // Prevent event bubbling to the Card
     navigator.clipboard.writeText(codeToCopy);
     setCopied(true);
 
@@ -22,7 +23,10 @@ const TripCard = ({ photo, tripName, description, date, codeToCopy }) => {
   };
 
   return (
-    <MuiCard sx={{ minWidth: 300, boxShadow: 3, borderRadius: 2 }}>
+    <MuiCard
+      sx={{ minWidth: 300, boxShadow: 3, borderRadius: 2 }}
+      onClick={onCardClick} // If you have an onClick for the Card
+    >
       {/* Image Section */}
       <CardMedia component="img" height="140" image={photo} alt={tripName} />
 
@@ -48,7 +52,7 @@ const TripCard = ({ photo, tripName, description, date, codeToCopy }) => {
           position: "relative",
           mt: 1,
           mx: 3,
-          mb:1
+          mb: 1,
         }}
       >
         <Typography

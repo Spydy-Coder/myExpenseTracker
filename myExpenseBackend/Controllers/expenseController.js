@@ -216,7 +216,7 @@ const getExpensesRequestByUser = async (req, res) => {
 
     // Step 1: Fetch all expenses for the given userId
     const expensesData = await ExpenseRequest.find({ user_id: userId })
-      .populate("payee", "id username") // Populate payee details
+      .populate("payee", "id username upiId") // Populate payee details
       .populate("trip_id", "uniqueId tripName"); // Populate trip details
 
     res.status(200).json({
