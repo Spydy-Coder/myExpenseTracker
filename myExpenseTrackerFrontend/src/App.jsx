@@ -10,9 +10,18 @@ import HomePage from "./Pages/HomePage";
 import DashboardContent from "./Components/DashboardContent";
 import TripContent from "./Components/TripContent";
 import ExpenseRequest from "./Components/ExpenseRequest";
-
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+const theme = createTheme({
+  palette: {
+    mode: "light", // Use "dark" here if you want a dark theme
+   
+  },
+});
 function App() {
   return (
+    <ThemeProvider theme={theme}>
+       <CssBaseline />
     <Router>
       <AuthProvider>
         <Routes>
@@ -46,6 +55,7 @@ function App() {
         </Routes>
       </AuthProvider>
     </Router>
+    </ThemeProvider>
   );
 }
 

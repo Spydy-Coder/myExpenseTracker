@@ -85,12 +85,12 @@ function ExpensesCards() {
           user_id: userId,
           payee: currentUserId,
           total_money: totalMoney,
-          expenses: expenses.map(({ category, desc, amount,_id, paid}) => ({
+          expenses: expenses.map(({ category, desc, amount, _id, paid }) => ({
             category,
             desc,
             amount,
             _id,
-            paid
+            paid,
           })),
         }),
       });
@@ -136,28 +136,35 @@ function ExpensesCards() {
   }
 
   const sortedExpenses = sortExpensesBySize(expensesData);
-
   const copyToClipboard = (
+    userId,
     userEmail,
     userName,
     expenses,
-    totalAmountUnpaid
+    totalAmountUnpaid,
+    totalAmount
   ) => {
+    const filteredExpenses = userId === currentUserId 
+      ? expenses.filter((expense) => expense.paid) // Include only paid expenses for current user
+      : expenses.filter((expense) => !expense.paid); // Include only unpaid expenses for others
+  
     const tableData = `User: ${userName}
-    Email: ${userEmail} 
-    Category | Amount | Description
-    ${expenses
-      .filter((expense) => !expense.paid) // Filter only unpaid expenses
-      .map(
-        (expense) =>
-          `${expense.category} | ₹${expense.amount} | ${expense.desc}`
-      )
-      .join("\n")}
-    Total: ₹${totalAmountUnpaid}`;
-
+      Email: ${userEmail} 
+      Category | Amount | Description
+      ${filteredExpenses
+        .map(
+          (expense) =>
+            `${expense.category} | ₹${expense.amount} | ${expense.desc}`
+        )
+        .join("\n")}
+      Total: ₹${
+        userId === currentUserId ? totalAmount : totalAmountUnpaid
+      }`;
+  
     navigator.clipboard.writeText(tableData);
     alert("Table copied to clipboard!");
   };
+  
 
   return (
     <Box
@@ -325,7 +332,11 @@ function ExpensesCards() {
                   }}
                 >
                   <Typography variant="subtitle1">
-                    <strong>Total Paid:</strong>
+                    {userId === currentUserId ? (
+                      <strong>Total Spends:</strong>
+                    ) : (
+                      <strong>Total Paid:</strong>
+                    )}
                     <Typography
                       component="span"
                       sx={{
@@ -337,20 +348,25 @@ function ExpensesCards() {
                       ₹{totalAmountPaid}
                     </Typography>
                   </Typography>
-
-                  <Typography variant="subtitle1">
-                    <strong>Total Unpaid:</strong>
-                    <Typography
-                      component="span"
-                      sx={{
-                        fontWeight: "bold",
-                        color: "#2a9d8f",
-                        marginLeft: "8px",
-                      }}
-                    >
-                      ₹{totalAmountUnpaid}
+                  {userId !== currentUserId ? (
+                    <Typography variant="subtitle1">
+                      <strong>Total Unpaid:</strong>
+                      <Typography
+                        component="span"
+                        sx={{
+                          fontWeight: "bold",
+                          color: "#2a9d8f",
+                          marginLeft: "8px",
+                        }}
+                      >
+                        ₹{totalAmountUnpaid}
+                      </Typography>
                     </Typography>
-                  </Typography>
+                  ) :  <Typography variant="subtitle1" sx={{fontStyle:"italic",
+                    color: "#2a9d8f",}}>
+                  <strong>* Includes only my contributions</strong>
+                 
+                </Typography>}
                 </Box>
 
                 <Box
@@ -393,28 +409,31 @@ function ExpensesCards() {
                     variant="contained"
                     onClick={() =>
                       copyToClipboard(
+                        userId,
                         user.email,
                         user.name,
                         expenses,
-                        totalAmountUnpaid
+                        totalAmountUnpaid,
+                        totalAmount
                       )
                     }
                   >
                     Copy Expense
                   </Button>
-                  
                 </Box>
                 <Typography
-  variant="body2"
-  sx={{
-    textAlign: "center",
-    marginTop: 2,
-    color: "#555",
-    fontStyle: "italic",
-  }}
->
-  *After creating expense, click on 'Send Request'
-</Typography>
+                  variant="body2"
+                  sx={{
+                    textAlign: "center",
+                    marginTop: 2,
+                    color: "#555",
+                    fontStyle: "italic",
+                  }}
+                >
+                  * After creating expense, click on 'Send Request'
+                </Typography>
+              
+
               </CardContent>
             </Card>
           );

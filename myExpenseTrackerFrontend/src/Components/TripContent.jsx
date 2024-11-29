@@ -1,23 +1,35 @@
 import React, { useState, useEffect } from "react";
 import { Box, Typography, Fab, CircularProgress } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
 import ExpensesCards from "./ExpensesCards";
 import SplitExpenseForm from "./SplitExpenseForm";
+import { useParams } from "react-router-dom";
+import ExpensePopup from "./ExpensePopup";
+import CustomSpeedDial from "./CustomSpeedDial";
+import { grey } from "@mui/material/colors";
 
 function TripContent() {
   const [isSplitExpenseFormOpen, setSplitExpenseFormOpen] = useState(false);
+  const [isExpensePopup, setIsExpensePopup] = useState(false);
   const [expensesUpdated, setExpensesUpdated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const { tripId } = useParams();
+  const userId = localStorage.getItem("userId");
 
   // Handles opening the Split Expense Form
   const handleCreateExpense = () => {
     setSplitExpenseFormOpen(true);
+  };
+  const handleShowTotalExpense = () => {
+    setIsExpensePopup(true);
   };
 
   // Handles closing the Split Expense Form and triggering re-fetch for updated expenses
   const closeSplitExpenseForm = () => {
     setSplitExpenseFormOpen(false);
     setExpensesUpdated((prev) => !prev);
+  };
+  const closeExpensePopup = () => {
+    setIsExpensePopup(false);
   };
 
   // Simulates loading state (replace this with real data fetching logic)
@@ -49,7 +61,7 @@ function TripContent() {
         alignItems: "center",
         justifyContent: "center",
         height: "auto",
-        width:"auto",
+        width: "auto",
 
         py: 3,
         gap: 3,
@@ -61,14 +73,31 @@ function TripContent() {
     >
       {/* Title Section */}
       <Typography
-        variant="h4"
+        variant="h4" // Defines the size and style of the heading
+        component="h1" // Semantic HTML element
         sx={{
-          mb: 2,
-          textAlign: "center",
-          fontWeight: "bold",
+          color: "primary.main", // Use theme's primary color
+          textAlign: "center", // Center-align the text
+          fontWeight: "bold", // Make the text bold
+          marginTop: 2, // Add margin to the top
         }}
       >
         Who Owes You?
+      </Typography>
+      <Typography
+        variant="caption"
+        sx={{
+          display: "block",
+          color: grey[700],
+
+          mx: 2,
+          textAlign: "center",
+          fontStyle: "italic",
+        }}
+        gutterBottom // Adds spacing below the heading
+      >
+        * Track and manage expenses effortlessly – see who owes you and ensure
+        every split is settled smoothly.
       </Typography>
 
       {/* Expenses Cards */}
@@ -78,20 +107,25 @@ function TripContent() {
       <Box
         sx={{
           position: "fixed",
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
           bottom: { xs: 16, sm: 30 }, // Responsive positioning
           right: { xs: 16, sm: 30 },
         }}
       >
-        <Fab
-          color="primary"
-          aria-label="Add Expense"
-          onClick={handleCreateExpense}
-        >
-          <AddIcon />
-        </Fab>
+        <CustomSpeedDial
+          handleCreateExpense={handleCreateExpense}
+          handleShowTotalExpense={handleShowTotalExpense}
+        />
       </Box>
+      <ExpensePopup
+        tripId={tripId}
+        userId={userId}
+        open={isExpensePopup}
+        onClose={closeExpensePopup}
+      />
 
-      {/* Split Expense Form Modal */}
       <SplitExpenseForm
         open={isSplitExpenseFormOpen}
         onClose={closeSplitExpenseForm}

@@ -113,6 +113,7 @@ function ExpenseRequest() {
         p: 3,
       }}
     >
+        
       {expenseRequests.map((request) => (
         <Card
           key={request.trip_id}
