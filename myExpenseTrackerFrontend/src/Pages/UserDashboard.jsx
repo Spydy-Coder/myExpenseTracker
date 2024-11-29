@@ -16,7 +16,9 @@ import SplitExpenseForm from "../Components/SplitExpenseForm";
 import {useAuth} from "../Auth/AuthProvider"
 import LogoutIcon from '@mui/icons-material/Logout';
 import JoinTrip from "../Components/JoinTrip"
+import UpiForm from "../Components/UpiForm";
 import { Link, Outlet } from "react-router-dom";
+import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import RequestPageIcon from '@mui/icons-material/RequestPage';
 import RefreshIcon from '@mui/icons-material/Refresh';
 
@@ -45,9 +47,11 @@ function UserDashboard(props) {
 
   const [isCreateTripFormOpen, setIsCreateTripFormOpen] = useState(false);
   const [isJoinTripFormOpen, setIsJoinTripFormOpen] = useState(false);
+  const [isUpiFormOpen, setIsUpiFormOpen] = useState(false); 
   const handleRefresh = async () => {
     navigate(0);
   };
+
 
   const handleOpenCreateTripForm = () => {
     setIsCreateTripFormOpen(true);
@@ -61,6 +65,9 @@ function UserDashboard(props) {
   const handleCloseCreateTripForm = () => {
     setIsCreateTripFormOpen(false);
   };
+  const handleOpenUpiForm = () => setIsUpiFormOpen(true);
+  const handleCloseUpiForm = () => setIsUpiFormOpen(false);
+
   const handleLogout = () => {
     logout();
   };
@@ -142,6 +149,14 @@ function UserDashboard(props) {
       kind: "divider",
     },
     {
+      segment: "upi",
+      title: <Typography onClick={handleOpenUpiForm}>Manage UPI ID</Typography>,
+      icon: <AccountBalanceWalletIcon onClick={handleOpenUpiForm} style={{ cursor: "pointer" }} />, // New option
+    },
+    {
+      kind: "divider",
+    },
+    {
       segment: "logout",
       title: <Typography onClick={handleLogout}>Logout</Typography>,
       icon: <LogoutIcon onClick={handleLogout} style={{ cursor: "pointer" }} />,
@@ -166,6 +181,7 @@ function UserDashboard(props) {
         <Outlet />
         <CreateTripForm open={isCreateTripFormOpen} onClose={handleCloseCreateTripForm} />
         <JoinTrip open={isJoinTripFormOpen} onClose={handleCloseChipForm} />
+        <UpiForm open={isUpiFormOpen} onClose={handleCloseUpiForm} />
       </DashboardLayout>
     </AppProvider>
   );

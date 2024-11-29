@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography, Fab, CircularProgress } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Fab,
+  CircularProgress,
+  useTheme,
+  useMediaQuery,
+} from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import ExpensesCards from "./ExpensesCards";
 import SplitExpenseForm from "./SplitExpenseForm";
 import { useParams } from "react-router-dom";
@@ -14,6 +22,10 @@ function TripContent() {
   const [loading, setLoading] = useState(true);
   const { tripId } = useParams();
   const userId = localStorage.getItem("userId");
+
+  // Get current theme and check if it's dark mode
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
 
   // Handles opening the Split Expense Form
   const handleCreateExpense = () => {
@@ -55,22 +67,22 @@ function TripContent() {
 
   return (
     <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "auto",
-        width: "auto",
+    sx={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      height: "auto",
+      width: "auto",
 
-        py: 3,
-        gap: 3,
-        backgroundColor: "#f5f5f5", // Light background for better readability
-        borderRadius: 2,
-        boxShadow: 3,
-        position: "relative",
-      }}
-    >
+      py: 3,
+      gap: 3,
+      backgroundColor: "#f5f5f5", // Light background for better readability
+      borderRadius: 2,
+      boxShadow: 3,
+      position: "relative",
+    }}
+  >
       {/* Title Section */}
       <Typography
         variant="h4" // Defines the size and style of the heading

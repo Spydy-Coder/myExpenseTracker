@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -6,12 +6,25 @@ import {
   TextField,
   Button,
   DialogActions,
-  Typography
+  Typography,
+  Alert,
 } from "@mui/material";
 
 const JoinTrip = ({ open, onClose }) => {
   const [tripCode, setTripCode] = useState("");
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState(""); // State for success message
+
+  // Clear alert after a few seconds
+  useEffect(() => {
+    if (successMessage || error) {
+      const timer = setTimeout(() => {
+        setSuccessMessage("");
+        setError("");
+      }, 4000); // Set to disappear after 4 seconds
+      return () => clearTimeout(timer); // Cleanup the timer on component unmount
+    }
+  }, [successMessage, error]);
   const apiUrl = import.meta.env.VITE_API_URL;
 
   const handleJoinTrip = async () => {
@@ -26,13 +39,16 @@ const JoinTrip = ({ open, onClose }) => {
       const data = await response.json();
 
       if (response.ok) {
-        alert("Successfully joined the trip!");
+        setSuccessMessage("Successfully joined the trip!"); // Set success message
+        setError(""); // Clear any previous errors
         onClose();
       } else {
         setError(data.message || "Failed to join the trip");
+        setSuccessMessage(""); // Clear success message if there is an error
       }
     } catch (error) {
       setError("An error occurred. Please try again.");
+      setSuccessMessage(""); // Clear success message if there is an error
     }
   };
 
@@ -47,7 +63,38 @@ const JoinTrip = ({ open, onClose }) => {
           fullWidth
           margin="dense"
         />
-        {error && <Typography color="error">{error}</Typography>}
+        {/* Display success message as an Alert */}
+        {successMessage && (
+          <Alert
+            severity="success"
+            sx={{
+              position: "fixed",
+              top: 70,
+              width: "50%",
+              zIndex: 100,
+              alignContent: "center",
+              alignItems: "center",
+            }}
+          >
+            {successMessage}
+          </Alert>
+        )}
+        {/* Display error message as an Alert */}
+        {error && (
+          <Alert
+            severity="error"
+            sx={{
+              position: "fixed",
+              top: 70,
+              width: "50%",
+              zIndex: 100,
+              alignContent: "center",
+              alignItems: "center",
+            }}
+          >
+            {error}
+          </Alert>
+        )}
       </DialogContent>
       <DialogActions>
         <Button

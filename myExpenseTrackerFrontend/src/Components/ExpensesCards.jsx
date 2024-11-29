@@ -14,6 +14,7 @@ import {
   TableRow,
   Paper,
   Button,
+  Alert,
   Container,
 } from "@mui/material";
 import { useParams } from "react-router-dom";
@@ -23,6 +24,7 @@ function ExpensesCards() {
   const [expensesData, setExpensesData] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(""); // State for success message
   const { tripId } = useParams();
   const currentUserId = localStorage.getItem("userId");
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -56,6 +58,17 @@ function ExpensesCards() {
 
     fetchExpenses();
   }, [tripId, currentUserId]);
+
+  // Clear alerts after 4 seconds
+  useEffect(() => {
+    if (successMessage || error) {
+      const timer = setTimeout(() => {
+        setSuccessMessage("");
+        setError("");
+      }, 4000); // Set the timeout to 4 seconds
+      return () => clearTimeout(timer); // Cleanup the timer on component unmount or when message changes
+    }
+  }, [successMessage, error]);
 
   // Sort expenses by the size of table data
   const sortExpensesBySize = (expensesData) => {
@@ -99,9 +112,9 @@ function ExpensesCards() {
         throw new Error(`Error: ${response.status}`);
       }
 
-      alert("Request sent successfully!");
+      setSuccessMessage("Request sent successfully!"); // Set success message
     } catch (err) {
-      alert("Failed to send request.");
+      setError("Failed to send request.");
       console.error(err);
     }
   };
@@ -144,10 +157,11 @@ function ExpensesCards() {
     totalAmountUnpaid,
     totalAmount
   ) => {
-    const filteredExpenses = userId === currentUserId 
-      ? expenses.filter((expense) => expense.paid) // Include only paid expenses for current user
-      : expenses.filter((expense) => !expense.paid); // Include only unpaid expenses for others
-  
+    const filteredExpenses =
+      userId === currentUserId
+        ? expenses.filter((expense) => expense.paid) // Include only paid expenses for current user
+        : expenses.filter((expense) => !expense.paid); // Include only unpaid expenses for others
+
     const tableData = `User: ${userName}
       Email: ${userEmail} 
       Category | Amount | Description
@@ -157,14 +171,11 @@ function ExpensesCards() {
             `${expense.category} | ₹${expense.amount} | ${expense.desc}`
         )
         .join("\n")}
-      Total: ₹${
-        userId === currentUserId ? totalAmount : totalAmountUnpaid
-      }`;
-  
+      Total: ₹${userId === currentUserId ? totalAmount : totalAmountUnpaid}`;
+
     navigator.clipboard.writeText(tableData);
-    alert("Table copied to clipboard!");
+    setSuccessMessage("Table copied to clipboard!"); // Set success message
   };
-  
 
   return (
     <Box
@@ -179,6 +190,38 @@ function ExpensesCards() {
         p: 3,
       }}
     >
+      {successMessage && (
+        <Alert
+          severity="success"
+          sx={{
+            position: "fixed",
+            top: 70,
+            width: "50%",
+            zIndex: 100,
+            alignContent: "center",
+            alignItems: "center",
+          }}
+        >
+          {successMessage}
+        </Alert>
+      )}
+
+      {/* Display error alert if error exists */}
+      {error && (
+        <Alert
+          severity="error"
+          sx={{
+            position: "fixed",
+            top: 70,
+            width: "50%",
+            zIndex: 100,
+            alignContent: "center",
+            alignItems: "center",
+          }}
+        >
+          {error}
+        </Alert>
+      )}
       {sortedExpenses.length > 0 ? (
         sortedExpenses.map(({ userDetails: user, expenses, userId }) => {
           const totalAmount = expenses.reduce(
@@ -362,11 +405,14 @@ function ExpensesCards() {
                         ₹{totalAmountUnpaid}
                       </Typography>
                     </Typography>
-                  ) :  <Typography variant="subtitle1" sx={{fontStyle:"italic",
-                    color: "#2a9d8f",}}>
-                  <strong>* Includes only my contributions</strong>
-                 
-                </Typography>}
+                  ) : (
+                    <Typography
+                      variant="subtitle1"
+                      sx={{ fontStyle: "italic", color: "#2a9d8f" }}
+                    >
+                      <strong>* Includes only my contributions</strong>
+                    </Typography>
+                  )}
                 </Box>
 
                 <Box
@@ -432,8 +478,6 @@ function ExpensesCards() {
                 >
                   * After creating expense, click on 'Send Request'
                 </Typography>
-              
-
               </CardContent>
             </Card>
           );
