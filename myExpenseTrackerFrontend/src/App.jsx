@@ -15,21 +15,20 @@ import CssBaseline from "@mui/material/CssBaseline";
 const theme = createTheme({
   palette: {
     mode: "light", // Use "dark" here if you want a dark theme
-   
   },
 });
 function App() {
   return (
     <ThemeProvider theme={theme}>
-       <CssBaseline />
-    <Router>
-      <AuthProvider>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/login" element={<Login />} />
+      <CssBaseline />
+      <Router>
+        <AuthProvider>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/login" element={<Login />} />
 
-          {/* <Route
+            {/* <Route
             path="/dashboard/:userId"
             element={
               <ProtectedRoute>
@@ -38,23 +37,23 @@ function App() {
             }
           /> */}
 
-          {/* Dashboard Layout */}
-          <Route
-            path="/dashboard/*"
-            element={
-              <ProtectedRoute>
-                <UserDashboard />
-              </ProtectedRoute>
-            }
-          >
-            {/* Nested Routes */}
-            <Route path=":userId" element={<DashboardContent />} />
-            <Route path="trip/:tripId" element={<TripContent />} />
-            <Route path="expenserequest" element={<ExpenseRequest />} />
-          </Route>
-        </Routes>
-      </AuthProvider>
-    </Router>
+            {/* Dashboard Layout */}
+            <Route
+              path="/dashboard/*"
+              element={
+                <ProtectedRoute>
+                  <UserDashboard />
+                </ProtectedRoute>
+              }
+            >
+              {/* Nested Routes */}
+              <Route path=":userId" element={<DashboardContent />} />
+              <Route path="trip/:tripId" element={<TripContent />} />
+              <Route path="expenserequest" element={<ExpenseRequest />} />
+            </Route>
+          </Routes>
+        </AuthProvider>
+      </Router>
     </ThemeProvider>
   );
 }

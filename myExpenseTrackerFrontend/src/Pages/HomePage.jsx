@@ -6,7 +6,7 @@ const HomePage = () => {
   const navigate = useNavigate();
 
   const handleStartClick = () => {
-    navigate('/signup');  // Change to '/login' if you prefer
+    navigate('/login');  // Navigate to the login page
   };
 
   return (
@@ -34,7 +34,7 @@ const HomePage = () => {
           zIndex: -1,
         }}
       >
-        <source src="https://www.vecteezy.com/video/2017828-animated-car-with-luggage-travels-go-to-around-the-world" type="video/mp4" />
+        <source src="/animation.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
 
@@ -42,35 +42,42 @@ const HomePage = () => {
       <Box
         sx={{
           position: 'absolute',
-          top: '0',
-          left: '0',
+          top: 0,
+          left: 0,
           width: '100%',
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',  // Optional overlay for readability
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
           color: 'white',
           textAlign: 'center',
           padding: '20px',
         }}
       >
-        <Typography variant="h3" gutterBottom>
+        <Typography 
+          variant="h3"
+          gutterBottom
+          sx={{
+            fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },  // Responsive font size
+          }}
+        >
           Let's Start Your Trip with Us
         </Typography>
         <Button
-          variant="contained"
-          color="primary"
+          variant="outlined"
           size="large"
           onClick={handleStartClick}
           sx={{
             marginTop: '20px',
-            padding: '10px 30px',
-            fontSize: '1.2rem',
-            backgroundColor: '#FF5722',  // Custom button color
+            padding: { xs: '8px 20px', sm: '10px 30px' },  // Responsive padding
+            fontSize: { xs: '1rem', sm: '1.2rem' },  // Responsive font size
+            color: 'white',
+            borderColor: 'white',
             '&:hover': {
-              backgroundColor: '#E64A19',
+              borderColor: '#E64A19',
+              color: '#E64A19',
             },
           }}
         >
