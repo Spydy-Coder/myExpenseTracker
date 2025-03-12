@@ -7,8 +7,13 @@ import {
   Box,
   CircularProgress,
   Button,
+  TextField,
+  Tooltip,
+  IconButton,
 } from "@mui/material";
-import { grey, red, green, blue } from "@mui/material/colors";
+import { grey, red, green, blue, purple } from "@mui/material/colors";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import QrCodeHolder from "./QrCodeHolder";
 
 function ExpenseRequest() {
   const userId = localStorage.getItem("userId");
@@ -16,6 +21,17 @@ function ExpenseRequest() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const apiUrl = import.meta.env.VITE_API_URL;
+  const [tooltipText, setTooltipText] = useState("Copy");
+  const color = purple[300];
+
+  const isMobile = window.innerWidth < 768;
+  const isTablet = window.innerWidth >= 768 && window.innerWidth <= 1024;
+
+  const handleCopy = (upiid) => {
+    navigator.clipboard.writeText(upiid);
+    setTooltipText("Copied!");
+    setTimeout(() => setTooltipText("Copy"), 2000); // Reset tooltip after 2 seconds
+  };
 
   const fetchExpenseRequests = async () => {
     setLoading(true);
@@ -37,6 +53,20 @@ function ExpenseRequest() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const paymentUpiLink = (upiId, amount, username) => {
+    return `upi://pay?pa=${upiId}&am=${amount}&cu=INR&tn=Expense SettleMent for ${username}`;
+  };
+
+  const handlePaymentUpi = (upiId, amount, username) => {
+    // Construct the UPI deep link
+    const upiLink = paymentUpiLink(upiId, amount, username);
+
+    // Open the UPI app (if it's installed on the user's device)
+
+    console.log(upiLink);
+    window.location.href = upiLink;
   };
 
   useEffect(() => {
@@ -113,7 +143,6 @@ function ExpenseRequest() {
         p: 3,
       }}
     >
-        
       {expenseRequests.map((request) => (
         <Card
           key={request.trip_id}
@@ -192,8 +221,18 @@ function ExpenseRequest() {
                 mb: 2,
               }}
             >
-              <strong>UPI ID:</strong> {request.payee.upiId ==='' ? 'Not Available':request.payee.upiId}
+              <strong>UPI ID:</strong>{" "}
+              {request.payee.upiId === ""
+                ? "Not Available"
+                : request.payee.upiId}{" "}
+              <Tooltip title={tooltipText}>
+                <IconButton onClick={() => handleCopy(request.payee.upiId)}>
+                  <ContentCopyIcon sx={{ fontSize: 18 }} />
+                </IconButton>
+              </Tooltip>
             </Typography>
+            <Divider />
+            {/* <UPIQRCodeGenerator/> */}
             <Divider sx={{ mb: 2 }} />
 
             {/* Expense Details */}
@@ -227,20 +266,20 @@ function ExpenseRequest() {
                 mb: 2,
                 pr: 1,
                 "&::-webkit-scrollbar": {
-                    width: "4px", // Width of the vertical scrollbar
-                    height: "4px", // Height of the horizontal scrollbar
+                  width: "4px", // Width of the vertical scrollbar
+                  height: "4px", // Height of the horizontal scrollbar
+                },
+                "&::-webkit-scrollbar-thumb": {
+                  backgroundColor: "#c1c1c1", // Scrollbar thumb color
+                  borderRadius: "4px", // Rounded scrollbar thumb
+                  "&:hover": {
+                    backgroundColor: "#a0a0a0", // Darker color on hover
                   },
-                  "&::-webkit-scrollbar-thumb": {
-                    backgroundColor: "#c1c1c1", // Scrollbar thumb color
-                    borderRadius: "4px", // Rounded scrollbar thumb
-                    "&:hover": {
-                      backgroundColor: "#a0a0a0", // Darker color on hover
-                    },
-                  },
-                  "&::-webkit-scrollbar-track": {
-                    backgroundColor: "#f1f1f1", // Scrollbar track color
-                    borderRadius: "4px",
-                  },
+                },
+                "&::-webkit-scrollbar-track": {
+                  backgroundColor: "#f1f1f1", // Scrollbar track color
+                  borderRadius: "4px",
+                },
               }}
             >
               {request.expenses.map((expense, index) => (
@@ -269,19 +308,53 @@ function ExpenseRequest() {
 
             {/* Mark as Paid Button */}
             <Box sx={{ textAlign: "center" }}>
-              <Button
-                variant="contained"
-                color="success"
-                onClick={() =>
-                  handleMarkAsPaid(
-                    request.trip_id,
-                    request.payee,
-                    request.expenses
-                  )
-                }
+              <Box
+                sx={{
+                  mt: 2,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: "16px",
+                }}
               >
-                Mark as Paid
-              </Button>
+                <Button
+                  variant="contained"
+                  color="success"
+                  onClick={() =>
+                    handleMarkAsPaid(
+                      request.trip_id,
+                      request.payee,
+                      request.expenses
+                    )
+                  }
+                >
+                  Mark as Paid
+                </Button>
+                {request.money_left >= 0 ? null : isMobile || isTablet ? (
+                  <Button
+                    variant="contained"
+                    onClick={() =>
+                      handlePaymentUpi(
+                        request.payee.upiId,
+                        Math.abs(request.money_left),
+                        request.payee.username
+                      )
+                    }
+                    sx={{ mr: 2, backgroundColor: purple[300] }}
+                  >
+                    Pay
+                  </Button>
+                ) : (
+                  <QrCodeHolder
+                    upiLink={paymentUpiLink(
+                      request.payee.upiId,
+                      Math.abs(request.money_left),
+                      request.payee.username
+                    )}
+                  />
+                )}
+              </Box>
+
               <Typography
                 variant="caption"
                 sx={{
