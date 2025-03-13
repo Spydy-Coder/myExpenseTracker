@@ -23,15 +23,19 @@ const TripCard = ({ photo, tripName, description, date, codeToCopy, onCardClick 
   };
 
   return (
-    <MuiCard
-      sx={{ minWidth: 300, boxShadow: 3, borderRadius: 2 }}
-      onClick={onCardClick} // If you have an onClick for the Card
-    >
+    <MuiCard sx={{ minWidth: 300, boxShadow: 3, borderRadius: 2 }}>
       {/* Image Section */}
-      <CardMedia component="img" height="140" image={photo} alt={tripName} />
+      <CardMedia
+        component="img"
+        height="140"
+        image={photo}
+        alt={tripName}
+        onClick={()=>onCardClick(codeToCopy)} // Add onClick here
+        sx={{ cursor: "pointer" }} // Add pointer cursor for better UX
+      />
 
       {/* Content Section */}
-      <CardContent>
+      <CardContent onClick={() => onCardClick(codeToCopy)} sx={{ cursor: "pointer" }}>
         <Typography gutterBottom variant="h5" component="div">
           {tripName}
         </Typography>
