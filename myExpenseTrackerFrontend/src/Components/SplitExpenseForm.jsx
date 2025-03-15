@@ -16,62 +16,114 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { useParams } from "react-router-dom";
+import NewCategoryForm from "./NewCategoryForm";
+import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 
 export default function SplitExpenseForm({ open, onClose }) {
-  const [categories] = useState(["Food", "Travel", "Miscellaneous"]); // Categories
+  const [categories, setCategories] = useState(["Others"]); // Categories
   const [selectedCategory, setSelectedCategory] = useState(""); // Selected category
   const [usernames, setUsernames] = useState({ members: [] }); // Usernames fetched from backend
   const [selectedOptions, setSelectedOptions] = useState([]); // Selected usernames (by id)
   const [totalMoney, setTotalMoney] = useState(""); // Total money input
-  const [description,setDescription] = useState("");
+  const [description, setDescription] = useState("");
   const [amounts, setAmounts] = useState({}); // Amounts for each username
   const [error, setError] = useState(""); // Validation error
   const [loading, setLoading] = useState(false); // Loading state for usernames
   const [fetchError, setFetchError] = useState(""); // Fetch error
-  const {tripId} = useParams(); // Replace with dynamic trip ID if needed
-  const userId = localStorage.getItem("userId")
+  const [openCategoryForm, setOpenCategoryForm] = useState(false);
+  const { tripId } = useParams(); // Replace with dynamic trip ID if needed
+  const userId = localStorage.getItem("userId");
   const apiUrl = import.meta.env.VITE_API_URL;
 
-  const clearAll = () =>{
+  const clearAll = () => {
     setSelectedCategory("");
     setDescription("");
     setTotalMoney("");
     setSelectedOptions([]);
     setAmounts({});
     setError("");
-  }
+  };
+
+  const fetchAllCategory = () => {
+    setLoading(true);
+    fetch(`${apiUrl}/trip/allcategory/${tripId}`) // Replace with your API endpoint
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to fetch usernames");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log(data);
+        if (data.category) setCategories(data.category);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching categories:", error);
+        setFetchError("Failed to fetch categories. Please try again.");
+        setLoading(false);
+      });
+  };
+
+  const fetchAllUserNames = () => {
+    setLoading(true);
+    fetch(`${apiUrl}/trip/allusernames/${tripId}`) // Replace with your API endpoint
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to fetch usernames");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setUsernames(data); // Expecting { members: [{ id, username }, ...] }
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching usernames:", error);
+        setFetchError("Failed to fetch usernames. Please try again.");
+        setLoading(false);
+      });
+  };
 
   // Fetch usernames from the backend when the popup opens
   useEffect(() => {
     if (open) {
-      setLoading(true);
-      fetch(`${apiUrl}/trip/allusernames/${tripId}`) // Replace with your API endpoint
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Failed to fetch usernames");
-          }
-          return response.json();
-        })
-        .then((data) => {
-          setUsernames(data); // Expecting { members: [{ id, username }, ...] }
-          setLoading(false);
-        })
-        .catch((error) => {
-          console.error("Error fetching usernames:", error);
-          setFetchError("Failed to fetch usernames. Please try again.");
-          setLoading(false);
-        });
+      fetchAllUserNames();
+      fetchAllCategory();
     }
   }, [open]);
 
+  const handleAddNewCategory = async (tripId, newcategory) => {
+    try {
+      const response = await fetch(`${apiUrl}/trip/addnewcategory`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tripId: tripId, newcategory: newcategory }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        fetchAllCategory();
+        closeCategoryForm();
+      } else {
+        console.log(`Error: ${data.error}`);
+      }
+    } catch (error) {
+      console.error(error, "Something went wrong. Please try again.");
+    }
+  };
+
   // Handle category selection
   const handleCategoryChange = (event) => {
-    setSelectedCategory(event.target.value);
+    if (event.target.value === "addnew") {
+      setOpenCategoryForm(true);
+    } else setSelectedCategory(event.target.value);
   };
 
   // Handle total money input
   const handleTotalMoneyChange = (event) => {
-    setTotalMoney(event.target.value);
+    if (event.target.value >= 0) setTotalMoney(event.target.value);
     setError(""); // Clear error when total money is changed
   };
   const handleDescriptionChange = (event) => {
@@ -79,12 +131,17 @@ export default function SplitExpenseForm({ open, onClose }) {
     setError(""); // Clear error when total money is changed
   };
 
+  const closeCategoryForm = () => {
+    setOpenCategoryForm(!openCategoryForm);
+  };
+
   // Handle selection of usernames (based on id)
   const handleOptionToggle = (userId) => {
-    setSelectedOptions((prev) =>
-      prev.includes(userId)
-        ? prev.filter((id) => id !== userId) // Remove if already selected
-        : [...prev, userId] // Add if not selected
+    setSelectedOptions(
+      (prev) =>
+        prev.includes(userId)
+          ? prev.filter((id) => id !== userId) // Remove if already selected
+          : [...prev, userId] // Add if not selected
     );
     setAmounts((prev) => ({ ...prev, [userId]: "" })); // Initialize amount for the user
   };
@@ -108,7 +165,9 @@ export default function SplitExpenseForm({ open, onClose }) {
   // Handle split equally functionality
   const handleSplitEqually = () => {
     if (selectedOptions.length > 0) {
-      const equalAmount = (Number(totalMoney) / selectedOptions.length).toFixed(2);
+      const equalAmount = (Number(totalMoney) / selectedOptions.length).toFixed(
+        2
+      );
       const splitAmounts = selectedOptions.reduce(
         (acc, userId) => ({ ...acc, [userId]: equalAmount }),
         {}
@@ -196,7 +255,7 @@ export default function SplitExpenseForm({ open, onClose }) {
         amount: Number(amounts[id]),
       })),
     };
-  
+
     fetch(`${apiUrl}/expense/create`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -219,160 +278,186 @@ export default function SplitExpenseForm({ open, onClose }) {
       });
   };
 
-
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth sx={{
-      overflowX:"hidden",
-      overflowY:"hidden",
-      "&::-webkit-scrollbar": {
-        width: "4px", // Width of the vertical scrollbar
-        height: "4px", // Height of the horizontal scrollbar
-      },
-      "&::-webkit-scrollbar-thumb": {
-        backgroundColor: "#c1c1c1", // Scrollbar thumb color
-        borderRadius: "4px", // Rounded scrollbar thumb
-        "&:hover": {
-          backgroundColor: "#a0a0a0", // Darker color on hover
-        },
-      },
-      "&::-webkit-scrollbar-track": {
-        backgroundColor: "#f1f1f1", // Scrollbar track color
-        borderRadius: "4px",
-      },
-    }}>
-      <DialogTitle>Split Money</DialogTitle>
-      <form onSubmit={handleSubmit}>
-        <DialogContent>
-          {/* Category Dropdown */}
-          <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel>Category</InputLabel>
-            <Select
-              value={selectedCategory}
-              onChange={handleCategoryChange}
-              label="Category"
-            >
-              {categories.map((category) => (
-                <MenuItem key={category} value={category}>
-                  {category}
+    <>
+      <Dialog
+        open={open}
+        onClose={onClose}
+        maxWidth="sm"
+        fullWidth
+        sx={{
+          overflowX: "hidden",
+          overflowY: "hidden",
+          "&::-webkit-scrollbar": {
+            width: "4px", // Width of the vertical scrollbar
+            height: "4px", // Height of the horizontal scrollbar
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "#c1c1c1", // Scrollbar thumb color
+            borderRadius: "4px", // Rounded scrollbar thumb
+            "&:hover": {
+              backgroundColor: "#a0a0a0", // Darker color on hover
+            },
+          },
+          "&::-webkit-scrollbar-track": {
+            backgroundColor: "#f1f1f1", // Scrollbar track color
+            borderRadius: "4px",
+          },
+        }}
+      >
+        <DialogTitle>Split Money</DialogTitle>
+        <form onSubmit={handleSubmit}>
+          <DialogContent>
+            {/* Category Dropdown */}
+            <FormControl fullWidth sx={{ mb: 2 }}>
+              <InputLabel>Category</InputLabel>
+              <Select
+                value={selectedCategory}
+                onChange={handleCategoryChange}
+                label="Category"
+              >
+                {categories.map((category) => (
+                  <MenuItem key={category} value={category}>
+                    {category}
+                  </MenuItem>
+                ))}
+                <MenuItem key={"addnew"} value={"addnew"}>
+                  <PlaylistAddIcon sx={{ mr: 1 }} /> Add New Category
                 </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <TextField
-            label="Description"
-            type="text"
-            fullWidth
-            value={description}
-            onChange={handleDescriptionChange}
-            sx={{ mb: 2 }}
-          />
+              </Select>
+            </FormControl>
+            <TextField
+              label="Description"
+              type="text"
+              fullWidth
+              value={description}
+              onChange={handleDescriptionChange}
+              sx={{ mb: 2 }}
+            />
 
-          {/* Total Money Input */}
-          <TextField
-            label="Total Money"
-            type="number"
-            fullWidth
-            value={totalMoney}
-            onChange={handleTotalMoneyChange}
-            sx={{ mb: 2 }}
-          />
+            {/* Total Money Input */}
+            <TextField
+              label="Total Money"
+              type="number"
+              fullWidth
+              value={totalMoney}
+              onChange={handleTotalMoneyChange}
+              sx={{ mb: 2 }}
+            />
 
-          {/* Usernames Selection */}
-          {loading ? (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 3 }}>
-              <CircularProgress />
-            </Box>
-          ) : fetchError ? (
-            <Typography color="error" sx={{ mt: 2 }}>
-              {fetchError}
-            </Typography>
-          ) : usernames.members.length > 0 ? (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              {usernames.members.map((member) => (
-                <Box
-                  key={member.id}
-                  sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px" }}
-                >
-                  <Chip
-                    label={member.id === userId ? "Self" : member.username}
-                    clickable
-                    color={
-                      member.id === userId && selectedOptions.includes(member.id)
-                        ? "success"
-                        : selectedOptions.includes(member.id)
-                        ? "primary"
-                        : "default"
-                    }
-                    onClick={() => handleOptionToggle(member.id)}
+            {/* Usernames Selection */}
+            {loading ? (
+              <Box sx={{ display: "flex", justifyContent: "center", py: 3 }}>
+                <CircularProgress />
+              </Box>
+            ) : fetchError ? (
+              <Typography color="error" sx={{ mt: 2 }}>
+                {fetchError}
+              </Typography>
+            ) : usernames.members.length > 0 ? (
+              <Box
+                sx={{ display: "flex", flexDirection: "column", gap: "16px" }}
+              >
+                {usernames.members.map((member) => (
+                  <Box
+                    key={member.id}
                     sx={{
-                      border: selectedOptions.includes(member.id)
-                        ? "2px solid #1976d2"
-                        : "1px solid #ccc",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: "16px",
                     }}
-                  />
-                  {selectedOptions.includes(member.id) && (
-                    <TextField
-                      label="Enter Amount"
-                      type="number"
-                      size="small"
-                      value={amounts[member.id] || ""}
-                      onChange={(event) => handleAmountChange(member.id, event)}
-                      sx={{ width: "150px"}}
+                  >
+                    <Chip
+                      label={member.id === userId ? "Self" : member.username}
+                      clickable
+                      color={
+                        member.id === userId &&
+                        selectedOptions.includes(member.id)
+                          ? "success"
+                          : selectedOptions.includes(member.id)
+                            ? "primary"
+                            : "default"
+                      }
+                      onClick={() => handleOptionToggle(member.id)}
+                      sx={{
+                        border: selectedOptions.includes(member.id)
+                          ? "2px solid #1976d2"
+                          : "1px solid #ccc",
+                      }}
                     />
-                  )}
-                </Box>
-              ))}
+                    {selectedOptions.includes(member.id) && (
+                      <TextField
+                        label="Enter Amount"
+                        type="number"
+                        size="small"
+                        value={amounts[member.id] || ""}
+                        onChange={(event) =>
+                          handleAmountChange(member.id, event)
+                        }
+                        sx={{ width: "150px" }}
+                      />
+                    )}
+                  </Box>
+                ))}
+              </Box>
+            ) : (
+              <Typography>No members found for this trip.</Typography>
+            )}
+
+            {/* Split Buttons */}
+            <Box sx={{ mt: 2, display: "flex", gap: "16px" }}>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={handleSplitEqually}
+                disabled={!selectedOptions.length || !totalMoney}
+              >
+                Split Equally
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSplitRest}
+                disabled={!selectedOptions.length || !totalMoney}
+              >
+                Split Rest
+              </Button>
             </Box>
-          ) : (
-            <Typography>No members found for this trip.</Typography>
-          )}
 
-          {/* Split Buttons */}
-          <Box sx={{ mt: 2, display: "flex", gap: "16px" }}>
+            {/* Error Message */}
+            {error && (
+              <Typography color="error" sx={{ mt: 2 }}>
+                {error}
+              </Typography>
+            )}
+          </DialogContent>
+          <DialogActions>
             <Button
-              variant="contained"
-              color="secondary"
-              onClick={handleSplitEqually}
-              disabled={!selectedOptions.length || !totalMoney}
+              onClick={onClose}
+              variant="outlined"
+              color="error"
+              sx={{
+                "&:hover": {
+                  backgroundColor: "rgba(255, 0, 0, 0.1)",
+                  color: "error.main",
+                },
+              }}
             >
-              Split Equally
+              Cancel
             </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleSplitRest}
-              disabled={!selectedOptions.length || !totalMoney}
-            >
-              Split Rest
+            <Button type="submit" variant="contained">
+              Submit
             </Button>
-          </Box>
-
-          {/* Error Message */}
-          {error && (
-            <Typography color="error" sx={{ mt: 2 }}>
-              {error}
-            </Typography>
-          )}
-        </DialogContent>
-        <DialogActions>
-        <Button
-            onClick={onClose}
-            variant="outlined"
-            color="error"
-            sx={{
-              "&:hover": {
-                backgroundColor: "rgba(255, 0, 0, 0.1)",
-                color: "error.main",
-              },
-            }}
-          >
-            Cancel
-          </Button>
-          <Button type="submit" variant="contained">
-            Submit
-          </Button>
-        </DialogActions>
-      </form>
-    </Dialog>
+          </DialogActions>
+        </form>
+      </Dialog>
+      <NewCategoryForm
+        open={openCategoryForm}
+        onClose={closeCategoryForm}
+        handleAddNewCategory={handleAddNewCategory}
+        tripId={tripId}
+      />
+    </>
   );
 }

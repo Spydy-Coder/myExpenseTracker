@@ -7,9 +7,10 @@ import {
   Box,
   CircularProgress,
   Button,
-  TextField,
   Tooltip,
   IconButton,
+  Avatar,
+  Chip,
 } from "@mui/material";
 import { grey, red, green, blue, purple } from "@mui/material/colors";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
@@ -22,7 +23,6 @@ function ExpenseRequest() {
   const [error, setError] = useState(null);
   const apiUrl = import.meta.env.VITE_API_URL;
   const [tooltipText, setTooltipText] = useState("Copy");
-  const color = purple[300];
 
   const isMobile = window.innerWidth < 768;
   const isTablet = window.innerWidth >= 768 && window.innerWidth <= 1024;
@@ -56,16 +56,11 @@ function ExpenseRequest() {
   };
 
   const paymentUpiLink = (upiId, amount, username) => {
-    return `upi://pay?pa=${upiId}&am=${amount}&cu=INR&tn=Expense SettleMent for ${username}`;
+    return `upi://pay?pa=${upiId}&am=${amount}&cu=INR&tn=Expense Settlement for ${username}`;
   };
 
   const handlePaymentUpi = (upiId, amount, username) => {
-    // Construct the UPI deep link
     const upiLink = paymentUpiLink(upiId, amount, username);
-
-    // Open the UPI app (if it's installed on the user's device)
-
-    console.log(upiLink);
     window.location.href = upiLink;
   };
 
@@ -141,22 +136,23 @@ function ExpenseRequest() {
         justifyContent: "center",
         alignItems: "flex-start",
         p: 3,
+        backgroundColor: "#f5f5f5", // Light background for the page
       }}
     >
       {expenseRequests.map((request) => (
         <Card
           key={request.trip_id}
           sx={{
-            width: 320,
-            height: 500, // Fixed card height
-            boxShadow: 8,
+            width: 350,
+            height: 550, // Fixed card height
+            boxShadow: 3,
             borderRadius: "16px",
             overflow: "hidden",
-            background: "linear-gradient(135deg, #f0f4ff, #e1e7ff)",
+            background: "linear-gradient(135deg, #ffffff, #f0f4ff)",
             transition: "transform 0.2s ease-in-out, box-shadow 0.2s",
             "&:hover": {
-              transform: "scale(1.05)",
-              boxShadow: 20,
+              transform: "scale(1.03)",
+              boxShadow: 6,
             },
           }}
         >
@@ -166,97 +162,102 @@ function ExpenseRequest() {
               flexDirection: "column",
               justifyContent: "space-between",
               height: "100%",
+              padding: "24px",
             }}
           >
             {/* Payment Status */}
-            <Box
+            <Chip
+              label={
+                request.expenses.every((expense) => expense.paid)
+                  ? "Fully Paid"
+                  : "Not Fully Paid"
+              }
               sx={{
-                display: "flex",
-                justifyContent: "center",
-                mb: 2,
-                backgroundColor: request.expenses.every(
-                  (expense) => expense.paid
-                )
+                alignSelf: "center",
+                backgroundColor: request.expenses.every((expense) => expense.paid)
                   ? green[100]
                   : red[100],
                 color: request.expenses.every((expense) => expense.paid)
                   ? green[800]
                   : red[800],
-                padding: "4px 8px",
-                borderRadius: "16px",
                 fontWeight: "bold",
-              }}
-            >
-              {request.expenses.every((expense) => expense.paid)
-                ? "Fully Paid"
-                : "Not Fully Paid"}
-            </Box>
-
-            {/* Trip ID and Payee */}
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: "bold",
-                textAlign: "center",
-                color: blue[800],
-                mb: 1,
-              }}
-            >
-              Trip ID: {request.trip_id}
-            </Typography>
-            <Typography
-              variant="subtitle1"
-              sx={{
-                textAlign: "center",
-                color: grey[700],
-              }}
-            >
-              <strong>Payee:</strong> {request.payee.username}
-            </Typography>
-            <Typography
-              variant="subtitle1"
-              sx={{
-                textAlign: "center",
-                color: grey[700],
                 mb: 2,
               }}
-            >
-              <strong>UPI ID:</strong>{" "}
-              {request.payee.upiId === ""
-                ? "Not Available"
-                : request.payee.upiId}{" "}
-              <Tooltip title={tooltipText}>
-                <IconButton onClick={() => handleCopy(request.payee.upiId)}>
-                  <ContentCopyIcon sx={{ fontSize: 18 }} />
-                </IconButton>
-              </Tooltip>
-            </Typography>
-            <Divider />
-            {/* <UPIQRCodeGenerator/> */}
+            />
+
+            {/* Trip ID and Payee */}
+            <Box sx={{ textAlign: "center", mb: 2 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: "bold",
+                  color: blue[800],
+                }}
+              >
+                Trip ID: {request.trip_id}
+              </Typography>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: grey[700],
+                }}
+              >
+                <strong>Payee:</strong> {request.payee.username}
+              </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 1,
+                  mt: 1,
+                }}
+              >
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    color: grey[700],
+                  }}
+                >
+                  <strong>UPI ID:</strong>{" "}
+                  {request.payee.upiId === ""
+                    ? "Not Available"
+                    : request.payee.upiId}
+                </Typography>
+                <Tooltip title={tooltipText}>
+                  <IconButton onClick={() => handleCopy(request.payee.upiId)}>
+                    <ContentCopyIcon sx={{ fontSize: 18 }} />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            </Box>
+
             <Divider sx={{ mb: 2 }} />
 
             {/* Expense Details */}
-            <Typography variant="subtitle1" sx={{ mb: 1 }}>
-              <strong>To be Sent:</strong> ₹{request.total_money}
-            </Typography>
-            <Typography variant="subtitle1" sx={{ mb: 1 }}>
-              <strong>To be Received:</strong> ₹{request.moneyToBeReceive}
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
-            <Typography
-              variant="subtitle1"
-              sx={{
-                textAlign: "center",
-                fontWeight: "bold",
-                color: grey[800],
-                mb: 2,
-              }}
-            >
-              {request.money_left > 0
-                ? "You will receive"
-                : "You will have to send"}{" "}
-              ₹{Math.abs(request.money_left)}
-            </Typography>
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                <strong>To be Sent:</strong> ₹{request.total_money}
+              </Typography>
+              <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                <strong>To be Received:</strong> ₹{request.moneyToBeReceive}
+              </Typography>
+              <Divider sx={{ mb: 2 }} />
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  textAlign: "center",
+                  fontWeight: "bold",
+                  color: grey[800],
+                  mb: 2,
+                }}
+              >
+                {request.money_left > 0
+                  ? "You will receive"
+                  : "You will have to send"}{" "}
+                ₹{Math.abs(request.money_left)}
+              </Typography>
+            </Box>
 
             {/* Expenses List */}
             <Box
@@ -266,18 +267,14 @@ function ExpenseRequest() {
                 mb: 2,
                 pr: 1,
                 "&::-webkit-scrollbar": {
-                  width: "4px", // Width of the vertical scrollbar
-                  height: "4px", // Height of the horizontal scrollbar
+                  width: "4px",
                 },
                 "&::-webkit-scrollbar-thumb": {
-                  backgroundColor: "#c1c1c1", // Scrollbar thumb color
-                  borderRadius: "4px", // Rounded scrollbar thumb
-                  "&:hover": {
-                    backgroundColor: "#a0a0a0", // Darker color on hover
-                  },
+                  backgroundColor: "#c1c1c1",
+                  borderRadius: "4px",
                 },
                 "&::-webkit-scrollbar-track": {
-                  backgroundColor: "#f1f1f1", // Scrollbar track color
+                  backgroundColor: "#f1f1f1",
                   borderRadius: "4px",
                 },
               }}
@@ -306,7 +303,7 @@ function ExpenseRequest() {
               ))}
             </Box>
 
-            {/* Mark as Paid Button */}
+            {/* Mark as Paid and Pay Buttons */}
             <Box sx={{ textAlign: "center" }}>
               <Box
                 sx={{
@@ -340,7 +337,7 @@ function ExpenseRequest() {
                         request.payee.username
                       )
                     }
-                    sx={{ mr: 2, backgroundColor: purple[300] }}
+                    sx={{ backgroundColor: purple[300] }}
                   >
                     Pay
                   </Button>

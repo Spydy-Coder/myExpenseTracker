@@ -30,13 +30,11 @@ exports.createTrip = async (req, res) => {
     // Update the user's trip list with the new trip
     // await User.findByIdAndUpdate(createdBy, { $push: { trips: newTrip._id } });
 
-    res
-      .status(201)
-      .json({
-        message: "Trip created successfully",
-        trip: newTrip,
-        uniqueId: uniqueId,
-      });
+    res.status(201).json({
+      message: "Trip created successfully",
+      trip: newTrip,
+      uniqueId: uniqueId,
+    });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -110,7 +108,9 @@ exports.getAllUsernames = async (req, res) => {
     );
 
     if (!users || users.length === 0) {
-      return res.status(404).json({ error: "No users found for the given members" });
+      return res
+        .status(404)
+        .json({ error: "No users found for the given members" });
     }
 
     // Map each user to an object containing id and username
@@ -124,5 +124,58 @@ exports.getAllUsernames = async (req, res) => {
   } catch (err) {
     console.error("Error fetching usernames:", err.message);
     res.status(500).json({ error: "Error fetching usernames" });
+  }
+};
+
+// Controller to get all categories
+exports.getAllCategory = async (req, res) => {
+  const { tripId } = req.params; // Extract tripId from URL parameters
+
+  try {
+    // Find the trip by uniqueId
+    const trip = await Trip.findOne({ uniqueId: tripId });
+
+    if (!trip) {
+      return res.status(404).json({ error: "Trip not found" });
+    }
+
+    const { category } = trip; // Extract the members array
+
+    if (!category || category.length === 0) {
+      return res.status(404).json({ error: "No Category found for this trip" });
+    }
+
+    console.log("Category", category);
+
+    res.status(200).json({ category: category });
+  } catch (err) {
+    console.error("Error fetching usernames:", err.message);
+    res.status(500).json({ error: "Error fetching usernames" });
+  }
+};
+
+// Controller to add a new Category
+exports.addNewCategory = async (req, res) => {
+  const { tripId, newcategory } = req.body;
+
+  try {
+    // Find the trip by its unique code
+    const trip = await Trip.findOne({ uniqueId: tripId });
+    if (!trip) {
+      return res.status(404).json({ message: "Trip not found" });
+    }
+
+    // Check if the user is already a member
+    if (trip.category.includes(newcategory)) {
+      return res.status(400).json({ message: "Category Already Present!" });
+    }
+
+    // Add the user to the trip's members array
+    trip.category.push(newcategory);
+    await trip.save();
+
+    res.status(200).json({ message: "Successfully joined the trip", trip });
+  } catch (error) {
+    res.status(500).json({ message: "Error joining trip", error });
   }
 };
