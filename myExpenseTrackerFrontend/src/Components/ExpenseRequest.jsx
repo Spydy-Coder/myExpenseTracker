@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Card,
   CardContent,
@@ -23,9 +23,16 @@ function ExpenseRequest() {
   const [error, setError] = useState(null);
   const apiUrl = import.meta.env.VITE_API_URL;
   const [tooltipText, setTooltipText] = useState("Copy");
+  const boxRef = useRef(null);
 
   const isMobile = window.innerWidth < 768;
   const isTablet = window.innerWidth >= 768 && window.innerWidth <= 1024;
+
+  useEffect(() => {
+    if (boxRef.current) {
+      boxRef.current.scrollTop = boxRef.current.scrollHeight; // Scroll to bottom
+    }
+  }, [expenseRequests]); // Runs when expenses change
 
   const handleCopy = (upiid) => {
     navigator.clipboard.writeText(upiid);
@@ -261,6 +268,7 @@ function ExpenseRequest() {
 
             {/* Expenses List */}
             <Box
+             ref={boxRef}
               sx={{
                 maxHeight: "150px",
                 overflowY: "auto",

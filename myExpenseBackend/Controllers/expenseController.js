@@ -76,6 +76,25 @@ const getTotalExpense = async (req, res) => {
     }
   };
   
+  const removeExpense = async(req,res) =>{
+    try{
+      const expenseId = req.params.id;
+      const {tripId,userId} = req.body;
+      const expense = Expense.findOne({trip_id:tripId,user_id:userId});
+
+      await Expense.updateOne(
+        {trip_id:tripId,user_id:userId},
+        { $pull: { expenses: { _id: expenseId } } }
+
+      );
+      res.status(200).json({message:`'Expense id'${expenseId}" deleted successfully!"`});
+    }
+    catch(error){
+      console.error("Error removing expense:", error);
+    res.status(500).json({ message: "Error removing expenses", error });
+    }
+
+  }
 
 const getExpensesByTripAndUser = async (req, res) => {
   try {
@@ -281,5 +300,7 @@ module.exports = {
   saveExpenseRequest,
   getExpensesRequestByUser,
   saveMarkExpensesPaid,
-  getTotalExpense
+  getTotalExpense,
+  removeExpense,
+
 };

@@ -54,7 +54,6 @@ export default function SplitExpenseForm({ open, onClose }) {
         return response.json();
       })
       .then((data) => {
-        console.log(data);
         if (data.category) setCategories(data.category);
         setLoading(false);
       })

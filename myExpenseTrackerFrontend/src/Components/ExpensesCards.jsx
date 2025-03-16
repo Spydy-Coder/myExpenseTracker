@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Box,
   Card,
@@ -19,6 +19,8 @@ import {
 } from "@mui/material";
 import { useParams } from "react-router-dom";
 import InsertChartOutlinedIcon from "@mui/icons-material/InsertChartOutlined";
+import DeleteIcon from "@mui/icons-material/Delete";
+import HandymanIcon from '@mui/icons-material/Handyman';
 
 function ExpensesCards() {
   const [expensesData, setExpensesData] = useState({});
@@ -28,7 +30,33 @@ function ExpensesCards() {
   const { tripId } = useParams();
   const currentUserId = localStorage.getItem("userId");
   const apiUrl = import.meta.env.VITE_API_URL;
+  const boxRef = useRef(null);
 
+  const deleteExpense = async (tripId, userId, expenseId) => {
+    try {
+      const response = await fetch(
+        `${apiUrl}/expense/removeexpense/${expenseId}`,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: userId, tripId: tripId }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete expense");
+      }
+
+      console.log("Expense deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting expense:", error);
+    }
+  };
+  useEffect(() => {
+    if (boxRef.current) {
+      boxRef.current.scrollTop = boxRef.current.scrollHeight; // Scroll to bottom
+    }
+  }, [expensesData]); // Runs when expenses change
   useEffect(() => {
     const fetchExpenses = async () => {
       setLoading(true);
@@ -238,7 +266,7 @@ function ExpensesCards() {
             <Card
               key={userId}
               sx={{
-                minWidth: 320,
+                minWidth: 352,
                 maxWidth: "100%",
                 boxShadow: 6,
                 borderRadius: "16px",
@@ -293,8 +321,9 @@ function ExpensesCards() {
                 <TableContainer
                   component={Paper}
                   elevation={0}
+                  ref={boxRef}
                   sx={{
-                    width: "320px", // Set the width to fit the card
+                    width:"352px", // Set the width to fit the card
                     height: { xs: "250px", sm: "250px", md: "300px" }, // Set a fixed height for the table container
                     background: "#f9f9f9",
                     borderRadius: "8px",
@@ -329,6 +358,9 @@ function ExpensesCards() {
                         <TableCell align="left">
                           <strong>Description</strong>
                         </TableCell>
+                        <TableCell align="center">
+                          <strong><HandymanIcon sx={{height:"20px",width:"20px"}}/></strong> {/* New Column for Delete */}
+                        </TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -356,6 +388,20 @@ function ExpensesCards() {
                           </TableCell>
 
                           <TableCell align="left">{expense.desc}</TableCell>
+                          <TableCell align="left">
+                            <DeleteIcon
+
+                              onClick={() => {
+                                deleteExpense(tripId, userId, expense._id);
+                              }}
+                             sx={{
+    cursor: expense.paid ? "default" : "pointer",
+    opacity: expense.paid ? 0.2 : 1,
+    pointerEvents: expense.paid ? "none" : "auto",
+  }}
+
+                            />
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -488,7 +534,7 @@ function ExpensesCards() {
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            height: "100px",
+            height: "100vh",
             textAlign: "center",
             padding: 2,
             background: "linear-gradient(135deg, #6e7aee, #ad79f5)",

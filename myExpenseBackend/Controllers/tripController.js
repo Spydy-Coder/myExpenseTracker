@@ -145,8 +145,6 @@ exports.getAllCategory = async (req, res) => {
       return res.status(404).json({ error: "No Category found for this trip" });
     }
 
-    console.log("Category", category);
-
     res.status(200).json({ category: category });
   } catch (err) {
     console.error("Error fetching usernames:", err.message);
