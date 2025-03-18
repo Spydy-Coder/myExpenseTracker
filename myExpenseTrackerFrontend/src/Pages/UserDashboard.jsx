@@ -13,14 +13,15 @@ import { useNavigate } from "react-router-dom";
 import CreateTripForm from "../Components/CreateTripForm";
 import TripCard from "../Components/TripCard"; // Ensure this is correctly imported
 import SplitExpenseForm from "../Components/SplitExpenseForm";
-import {useAuth} from "../Auth/AuthProvider"
-import LogoutIcon from '@mui/icons-material/Logout';
-import JoinTrip from "../Components/JoinTrip"
+import { useAuth } from "../Auth/AuthProvider";
+import LogoutIcon from "@mui/icons-material/Logout";
+import JoinTrip from "../Components/JoinTrip";
 import UpiForm from "../Components/UpiForm";
 import { Link, Outlet } from "react-router-dom";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
-import RequestPageIcon from '@mui/icons-material/RequestPage';
-import RefreshIcon from '@mui/icons-material/Refresh';
+import RequestPageIcon from "@mui/icons-material/RequestPage";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import Badge from "@mui/material/Badge";
 
 const demoTheme = createTheme({
   cssVariables: {
@@ -38,20 +39,65 @@ const demoTheme = createTheme({
   },
 });
 
-
 function UserDashboard(props) {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const { window } = props;
   const userId = localStorage.getItem("userId");
+  const apiUrl = import.meta.env.VITE_API_URL;
 
   const [isCreateTripFormOpen, setIsCreateTripFormOpen] = useState(false);
   const [isJoinTripFormOpen, setIsJoinTripFormOpen] = useState(false);
-  const [isUpiFormOpen, setIsUpiFormOpen] = useState(false); 
+  const [isUpiFormOpen, setIsUpiFormOpen] = useState(false);
+  const [pendingRequest, setPendingRequest] = useState(0);
   const handleRefresh = async () => {
     navigate(0);
   };
 
+  const calculatePendingRequest = (allRequests) => {
+    let count = 0;
+
+    for (const request of allRequests) {
+      // Use `of` instead of `in` for iterating over array items
+      if (!request.expenses.every((expense) => expense.paid)) {
+        // Check if not all expenses are paid
+        count += 1;
+      }
+    }
+
+    return count;
+  };
+
+  const fetchExpenseRequests = async () => {
+    try {
+      const response = await fetch(`${apiUrl}/expense/requests/${userId}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      setPendingRequest(calculatePendingRequest(result.data));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    // Fetch immediately when the component loads
+    fetchExpenseRequests();
+
+    // Set interval to fetch data every 15 seconds
+    const intervalId = setInterval(() => {
+      fetchExpenseRequests();
+    }, 15000); // 15 seconds interval
+
+    // Clean up the interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []);
 
   const handleOpenCreateTripForm = () => {
     setIsCreateTripFormOpen(true);
@@ -102,10 +148,12 @@ function UserDashboard(props) {
         </Typography>
       ),
       icon: (
-        <RequestPageIcon
-          style={{ cursor: "pointer" }}
-          onClick={() => navigate(`expenserequest`)}
-        />
+        <Badge badgeContent={pendingRequest} color="primary">
+          <RequestPageIcon
+            style={{ cursor: "pointer" }}
+            onClick={() => navigate(`expenserequest`)}
+          />
+        </Badge>
       ),
     },
     {
@@ -139,10 +187,7 @@ function UserDashboard(props) {
       segment: "refresh",
       title: <Typography onClick={handleRefresh}>Refresh</Typography>,
       icon: (
-        <RefreshIcon
-        onClick={handleRefresh}
-        style={{ cursor: "pointer" }}
-      />
+        <RefreshIcon onClick={handleRefresh} style={{ cursor: "pointer" }} />
       ),
     },
     {
@@ -151,7 +196,12 @@ function UserDashboard(props) {
     {
       segment: "upi",
       title: <Typography onClick={handleOpenUpiForm}>Manage UPI ID</Typography>,
-      icon: <AccountBalanceWalletIcon onClick={handleOpenUpiForm} style={{ cursor: "pointer" }} />, // New option
+      icon: (
+        <AccountBalanceWalletIcon
+          onClick={handleOpenUpiForm}
+          style={{ cursor: "pointer" }}
+        />
+      ), // New option
     },
     {
       kind: "divider",
@@ -161,7 +211,6 @@ function UserDashboard(props) {
       title: <Typography onClick={handleLogout}>Logout</Typography>,
       icon: <LogoutIcon onClick={handleLogout} style={{ cursor: "pointer" }} />,
     },
-    
   ];
 
   const BRANDING = {
@@ -179,7 +228,10 @@ function UserDashboard(props) {
       <DashboardLayout>
         {/* Dynamic Content Rendered Here */}
         <Outlet />
-        <CreateTripForm open={isCreateTripFormOpen} onClose={handleCloseCreateTripForm} />
+        <CreateTripForm
+          open={isCreateTripFormOpen}
+          onClose={handleCloseCreateTripForm}
+        />
         <JoinTrip open={isJoinTripFormOpen} onClose={handleCloseChipForm} />
         <UpiForm open={isUpiFormOpen} onClose={handleCloseUpiForm} />
       </DashboardLayout>
