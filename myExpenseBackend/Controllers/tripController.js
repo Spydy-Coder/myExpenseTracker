@@ -28,7 +28,7 @@ exports.createTrip = async (req, res) => {
     await newTrip.save();
 
     // Update the user's trip list with the new trip
-    // await User.findByIdAndUpdate(createdBy, { $push: { trips: newTrip._id } });
+    await User.findByIdAndUpdate(createdBy, { $push: { trips: newTrip._id } });
 
     res.status(201).json({
       message: "Trip created successfully",
@@ -73,6 +73,9 @@ exports.joinTrip = async (req, res) => {
         .status(400)
         .json({ message: "User already a member of this trip" });
     }
+
+    // Update the user's trip list with the new trip
+    await User.findByIdAndUpdate(userId, { $push: { trips: trip._id } });
 
     // Add the user to the trip's members array
     trip.members.push(userId);

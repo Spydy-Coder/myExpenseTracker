@@ -181,7 +181,9 @@ function ExpenseRequest() {
               }
               sx={{
                 alignSelf: "center",
-                backgroundColor: request.expenses.every((expense) => expense.paid)
+                backgroundColor: request.expenses.every(
+                  (expense) => expense.paid
+                )
                   ? green[100]
                   : red[100],
                 color: request.expenses.every((expense) => expense.paid)
@@ -268,7 +270,7 @@ function ExpenseRequest() {
 
             {/* Expenses List */}
             <Box
-             ref={boxRef}
+              ref={boxRef}
               sx={{
                 maxHeight: "150px",
                 overflowY: "auto",
@@ -335,7 +337,8 @@ function ExpenseRequest() {
                 >
                   Mark as Paid
                 </Button>
-                {request.money_left >= 0 ? null : isMobile || isTablet ? (
+                {request.money_left >= 0 ||
+                request.payee.upiId === "" ? null : isMobile || isTablet ? (
                   <Button
                     variant="contained"
                     onClick={() =>

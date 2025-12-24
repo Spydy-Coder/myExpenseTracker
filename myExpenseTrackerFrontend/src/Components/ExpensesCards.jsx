@@ -391,8 +391,9 @@ function ExpensesCards() {
                           <TableCell align="left">
                             <DeleteIcon
 
-                              onClick={() => {
-                                deleteExpense(tripId, userId, expense._id);
+                              onClick={async () => {
+                                await deleteExpense(tripId, userId, expense._id);
+                                window.location.reload()
                               }}
                              sx={{
     cursor: expense.paid ? "default" : "pointer",

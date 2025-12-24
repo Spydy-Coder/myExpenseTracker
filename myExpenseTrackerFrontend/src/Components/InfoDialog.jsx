@@ -16,13 +16,20 @@ export default function InfoDialog({ open, handleClose }) {
         aria-describedby="alert-dialog-description"
       >
         <DialogTitle id="alert-dialog-title">{"Note"}</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            If you mistakenly added a split, you can delete it from the
-            respective group members. However, please note that once the request
-            has been sent, the split cannot be deleted.
-          </DialogContentText>
-        </DialogContent>
+       <DialogContent>
+  <DialogContentText
+    id="alert-dialog-description"
+    sx={{ padding: '16px' }} // or p: 2 (theme spacing)
+  >
+    ⚠️ If you mistakenly added a split, you can delete it from the
+    respective group members. However, please note that once the request
+    has been sent and the amount has been paid, the split cannot be deleted.
+    <br /><br />
+    ℹ️ Don’t forget to add your UPI ID through the 'Manage UPI ID' section for easy and seamless transfers.
+  </DialogContentText>
+</DialogContent>
+
+
         <DialogActions>
           <Button onClick={handleClose}>Ok, Understood</Button>
         </DialogActions>
