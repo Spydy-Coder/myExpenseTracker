@@ -77,7 +77,8 @@ function ExpensePopup({ tripId, userId, open, onClose }) {
           <>
             {/* Total Spent */}
             <Box sx={{ mb: 3, textAlign: "center" }}>
-              <Typography variant="h5" sx={{ fontWeight: "bold", mb: 1 }}>
+              <Typography variant="h5" sx={{ fontWeight: "bold", mb: 1 , backgroundImage:
+              "linear-gradient(160deg, #0a6a9b 0%, #44b5ad 100%)",color:'white',borderRadius:'20px'}}>
                 Total Spent: ₹{totalSpent || 0}
               </Typography>
               <Divider />

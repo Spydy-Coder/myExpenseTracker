@@ -14,11 +14,13 @@ import { useParams } from "react-router-dom";
 import ExpensePopup from "./ExpensePopup";
 import CustomSpeedDial from "./CustomSpeedDial";
 import { grey } from "@mui/material/colors";
+import InfoDialog from "./InfoDialog";
 
 function TripContent() {
   const [isSplitExpenseFormOpen, setSplitExpenseFormOpen] = useState(false);
   const [isExpensePopup, setIsExpensePopup] = useState(false);
   const [expensesUpdated, setExpensesUpdated] = useState(false);
+  const [isInfoDialogOpen, setInfoDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const { tripId } = useParams();
   const userId = localStorage.getItem("userId");
@@ -33,6 +35,14 @@ function TripContent() {
   };
   const handleShowTotalExpense = () => {
     setIsExpensePopup(true);
+  };
+
+  const handleInfoDialog = () => {
+    setInfoDialogOpen(true);
+  };
+
+  const handleCloseInfoDialog = () => {
+    setInfoDialogOpen(false);
   };
 
   // Handles closing the Split Expense Form and triggering re-fetch for updated expenses
@@ -67,22 +77,22 @@ function TripContent() {
 
   return (
     <Box
-    sx={{
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      height: "auto",
-      width: "auto",
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "auto",
+        width: "auto",
 
-      py: 3,
-      gap: 3,
-      backgroundColor: "#f5f5f5", // Light background for better readability
-      borderRadius: 2,
-      boxShadow: 3,
-      position: "relative",
-    }}
-  >
+        py: 3,
+        gap: 3,
+        backgroundColor: "#f5f5f5", // Light background for better readability
+        borderRadius: 2,
+        boxShadow: 3,
+        position: "relative",
+      }}
+    >
       {/* Title Section */}
       <Typography
         variant="h4" // Defines the size and style of the heading
@@ -129,6 +139,7 @@ function TripContent() {
         <CustomSpeedDial
           handleCreateExpense={handleCreateExpense}
           handleShowTotalExpense={handleShowTotalExpense}
+          handleInfoDialog={handleInfoDialog}
         />
       </Box>
       <ExpensePopup
@@ -142,6 +153,7 @@ function TripContent() {
         open={isSplitExpenseFormOpen}
         onClose={closeSplitExpenseForm}
       />
+      <InfoDialog open={isInfoDialogOpen} handleClose={handleCloseInfoDialog} />
     </Box>
   );
 }
