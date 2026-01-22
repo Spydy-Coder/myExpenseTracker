@@ -93,6 +93,15 @@ const SignIn = () => {
             Sign Up
           </a>
         </Typography>
+
+        <Typography variant="body2" align="center" sx={{ marginTop: 1 }}>
+          <a
+            href="/forgot-password"
+            style={{ textDecoration: "none", color: "#1976d2" }}
+          >
+            Forgot Password?
+          </a>
+        </Typography>
       </Box>
     </Card>
   );
