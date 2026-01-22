@@ -214,8 +214,7 @@ function ExpensesCards() {
         justifyContent: "center",
         alignItems: "center",
         height: "auto",
-        width: "auto",
-        p: 3,
+        width: "auto"
       }}
     >
       {successMessage && (

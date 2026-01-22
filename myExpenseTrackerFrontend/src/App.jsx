@@ -12,6 +12,9 @@ import TripContent from "./Components/TripContent";
 import ExpenseRequest from "./Components/ExpenseRequest";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
+import ResetPassword from "./Pages/ResetPassword";
+import ForgotPassword from "./Pages/ForgotPassword";
+
 const theme = createTheme({
   palette: {
     mode: "light", // Use "dark" here if you want a dark theme
@@ -27,6 +30,8 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
             {/* <Route
             path="/dashboard/:userId"

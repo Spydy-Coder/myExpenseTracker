@@ -25,7 +25,7 @@ const tripSchema = new mongoose.Schema({
   },
   members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] // Array to store members participating in the trip
   ,
-  category: {type: [{type:String}], default: ["Food", "Travel", "Ohers"]}
+  category: {type: [{type:String}], default: ["Food", "Travel", "Others"]}
 });
 
 module.exports = mongoose.model('Trip', tripSchema);
