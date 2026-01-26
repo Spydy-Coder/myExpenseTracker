@@ -16,17 +16,24 @@ import {
   Button,
   Alert,
   Container,
+   Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 import { useParams } from "react-router-dom";
 import InsertChartOutlinedIcon from "@mui/icons-material/InsertChartOutlined";
 import DeleteIcon from "@mui/icons-material/Delete";
-import HandymanIcon from '@mui/icons-material/Handyman';
+import HandymanIcon from "@mui/icons-material/Handyman";
 
 function ExpensesCards() {
   const [expensesData, setExpensesData] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(""); // State for success message
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [selectedExpense, setSelectedExpense] = useState(null);
   const { tripId } = useParams();
   const currentUserId = localStorage.getItem("userId");
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -40,7 +47,7 @@ function ExpensesCards() {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ userId: userId, tripId: tripId }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -66,7 +73,7 @@ function ExpensesCards() {
           {
             method: "GET",
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
 
         if (!response.ok) {
@@ -111,7 +118,7 @@ function ExpensesCards() {
           ? -1
           : b.userId === currentUserId
             ? 1
-            : b.totalExpenses - a.totalExpenses
+            : b.totalExpenses - a.totalExpenses,
       );
   };
 
@@ -183,7 +190,7 @@ function ExpensesCards() {
     userName,
     expenses,
     totalAmountUnpaid,
-    totalAmount
+    totalAmount,
   ) => {
     const filteredExpenses =
       userId === currentUserId
@@ -196,7 +203,7 @@ function ExpensesCards() {
       ${filteredExpenses
         .map(
           (expense) =>
-            `${expense.category} | ₹${expense.amount} | ${expense.desc}`
+            `${expense.category} | ₹${expense.amount} | ${expense.desc}`,
         )
         .join("\n")}
       Total: ₹${userId === currentUserId ? totalAmount : totalAmountUnpaid}`;
@@ -214,7 +221,7 @@ function ExpensesCards() {
         justifyContent: "center",
         alignItems: "center",
         height: "auto",
-        width: "auto"
+        width: "auto",
       }}
     >
       {successMessage && (
@@ -253,11 +260,11 @@ function ExpensesCards() {
         sortedExpenses.map(({ userDetails: user, expenses, userId }) => {
           const totalAmount = expenses.reduce(
             (acc, expense) => acc + expense.amount,
-            0
+            0,
           );
           const totalAmountUnpaid = expenses.reduce(
             (acc, expense) => (!expense.paid ? acc + expense.amount : 0),
-            0
+            0,
           );
           const totalAmountPaid = totalAmount - totalAmountUnpaid;
 
@@ -322,7 +329,7 @@ function ExpensesCards() {
                   elevation={0}
                   ref={boxRef}
                   sx={{
-                    width:"352px", // Set the width to fit the card
+                    width: "352px", // Set the width to fit the card
                     height: { xs: "250px", sm: "250px", md: "300px" }, // Set a fixed height for the table container
                     background: "#f9f9f9",
                     borderRadius: "8px",
@@ -358,7 +365,12 @@ function ExpensesCards() {
                           <strong>Description</strong>
                         </TableCell>
                         <TableCell align="center">
-                          <strong><HandymanIcon sx={{height:"20px",width:"20px"}}/></strong> {/* New Column for Delete */}
+                          <strong>
+                            <HandymanIcon
+                              sx={{ height: "20px", width: "20px" }}
+                            />
+                          </strong>{" "}
+                          {/* New Column for Delete */}
                         </TableCell>
                       </TableRow>
                     </TableHead>
@@ -389,17 +401,17 @@ function ExpensesCards() {
                           <TableCell align="left">{expense.desc}</TableCell>
                           <TableCell align="left">
                             <DeleteIcon
-
-                              onClick={async () => {
-                                await deleteExpense(tripId, userId, expense._id);
-                                window.location.reload()
+                              onClick={() => {
+                                if (!expense.paid) {
+                                  setSelectedExpense({ ...expense, userId });
+                                  setOpenDeleteDialog(true);
+                                }
                               }}
-                             sx={{
-    cursor: expense.paid ? "default" : "pointer",
-    opacity: expense.paid ? 0.2 : 1,
-    pointerEvents: expense.paid ? "none" : "auto",
-  }}
-
+                              sx={{
+                                cursor: expense.paid ? "default" : "pointer",
+                                opacity: expense.paid ? 0.2 : 1,
+                                pointerEvents: expense.paid ? "none" : "auto",
+                              }}
                             />
                           </TableCell>
                         </TableRow>
@@ -506,7 +518,7 @@ function ExpensesCards() {
                         user.name,
                         expenses,
                         totalAmountUnpaid,
-                        totalAmount
+                        totalAmount,
                       )
                     }
                   >
@@ -570,6 +582,41 @@ function ExpensesCards() {
           </Box>
         </Box>
       )}
+      <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this expense?
+            <br />
+            <strong>{selectedExpense?.desc || "This item"}</strong>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDeleteDialog(false)} color="inherit">
+            Cancel
+          </Button>
+          <Button
+            color="error"
+            variant="contained"
+            onClick={async () => {
+              if (!selectedExpense) return;
+
+              await deleteExpense(
+                tripId,
+                selectedExpense.userId,
+                selectedExpense._id,
+              );
+
+              setOpenDeleteDialog(false);
+              setSelectedExpense(null);
+
+              window.location.reload();
+            }}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
