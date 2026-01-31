@@ -46,36 +46,75 @@ const saveExpense = async (req, res) => {
 };
 
 const getTotalExpense = async (req, res) => {
-    try {
-      const { tripId, userId } = req.params;
-  
-      // Fetch the total expense data based on userId and tripId
-      const result = await Expense.findOne({
-        user_id: userId,
-        trip_id: tripId,
-      });
-  
-      // Check if a result was found
-      if (!result) {
-        return res.status(404).json({
-          message: "No expenses found for the given user and trip.",
-        });
-      }
-  
-      // Respond with the fetched data
-      res.status(200).json({
-        message: "Fetched total expenses successfully!",
-        data: result,
-      });
-    } catch (error) {
-      console.error("Error fetching total expenses:", error);
-      res.status(500).json({
-        message: "Error fetching total expenses",
-        error: error.message,
+  try {
+    const { tripId, userId } = req.params;
+
+    // Fetch the total expense data based on userId and tripId
+    const result = await Expense.findOne({
+      user_id: userId,
+      trip_id: tripId,
+    });
+
+    // Check if a result was found
+    if (!result) {
+      return res.status(404).json({
+        message: "No expenses found for the given user and trip.",
       });
     }
-  };
-  
+
+    // Respond with the fetched data
+    res.status(200).json({
+      message: "Fetched total expenses successfully!",
+      data: result,
+    });
+  } catch (error) {
+    console.error("Error fetching total expenses:", error);
+    res.status(500).json({
+      message: "Error fetching total expenses",
+      error: error.message,
+    });
+  }
+};
+
+const removeExpense = async (req, res) => {
+  try {
+    const expenseId = req.params.id;
+    const { tripId, userId } = req.body;
+
+    // Remove expense from Expense collection
+    const updateResult = await Expense.updateOne(
+      { trip_id: tripId, user_id: userId },
+      { $pull: { expenses: { _id: expenseId, paid: false } } }
+    );
+
+    if (updateResult.modifiedCount === 0) {
+      return res
+        .status(400)
+        .json({ message: "Expense not found or already paid" });
+    }
+
+    // Remove expense from ExpenseRequest collection
+    const result = await ExpenseRequest.findOneAndUpdate(
+       { trip_id: tripId, user_id: userId },
+      { $pull: { expenses: { _id: expenseId, paid: false } } },
+      { new: true }
+    );
+
+    if (result) {
+      // Delete ExpenseRequest document if no expenses left
+      if (result.expenses.length === 0) {
+        await ExpenseRequest.deleteOne({ _id: result._id });
+      }
+    }
+
+    res
+      .status(200)
+      .json({ message: `Expense id ${expenseId} deleted successfully!` });
+  } catch (error) {
+    console.error("Error removing expense:", error);
+    res.status(500).json({ message: "Error removing expense", error });
+  }
+};
 
 const getExpensesByTripAndUser = async (req, res) => {
   try {
@@ -216,7 +255,7 @@ const getExpensesRequestByUser = async (req, res) => {
 
     // Step 1: Fetch all expenses for the given userId
     const expensesData = await ExpenseRequest.find({ user_id: userId })
-      .populate("payee", "id username") // Populate payee details
+      .populate("payee", "id username upiId") // Populate payee details
       .populate("trip_id", "uniqueId tripName"); // Populate trip details
 
     res.status(200).json({
@@ -281,5 +320,6 @@ module.exports = {
   saveExpenseRequest,
   getExpensesRequestByUser,
   saveMarkExpensesPaid,
-  getTotalExpense
+  getTotalExpense,
+  removeExpense,
 };

@@ -4,11 +4,13 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import TripCard from "./TripCard";
 import { grey } from "@mui/material/colors";
+import { useNavigate } from "react-router-dom";
 
 const TripDetails = () => {
   const [trips, setTrips] = useState([]);
   const userId = localStorage.getItem("userId");
   const apiUrl = import.meta.env.VITE_API_URL;
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchTrips = async () => {
@@ -26,6 +28,10 @@ const TripDetails = () => {
 
     fetchTrips();
   }, []);
+
+  const onCardClick = (tripId) => {
+    navigate(`/dashboard/trip/${tripId}`);
+  };
 
   return (
     <Box sx={{ py: 4, textAlign: "center" }}>
@@ -76,18 +82,14 @@ const TripDetails = () => {
                 marginBottom: "20px",
               }}
             >
-              <Link
-                to={`/dashboard/trip/${trip.uniqueId}`}
-                style={{ textDecoration: "none" }}
-              >
-                <TripCard
-                  photo="https://www.shutterstock.com/shutterstock/photos/1247506609/display_1500/stock-vector-cabriolet-car-with-people-diverse-group-of-men-and-women-enjoy-ride-and-music-happy-young-friends-1247506609.jpg"
-                  tripName={trip.tripName}
-                  description={trip.desc}
-                  date={new Date(trip.date).toLocaleDateString()}
-                  codeToCopy={trip.uniqueId}
-                />
-              </Link>
+              <TripCard
+                photo="https://www.shutterstock.com/shutterstock/photos/1247506609/display_1500/stock-vector-cabriolet-car-with-people-diverse-group-of-men-and-women-enjoy-ride-and-music-happy-young-friends-1247506609.jpg"
+                tripName={trip.tripName}
+                description={trip.desc}
+                date={new Date(trip.date).toLocaleDateString()}
+                onCardClick={onCardClick}
+                codeToCopy={trip.uniqueId}
+              />
             </Box>
           ))}
         </Box>

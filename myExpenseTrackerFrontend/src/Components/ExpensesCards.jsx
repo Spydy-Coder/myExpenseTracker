@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Box,
   Card,
@@ -16,19 +16,54 @@ import {
   Button,
   Alert,
   Container,
+   Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 import { useParams } from "react-router-dom";
 import InsertChartOutlinedIcon from "@mui/icons-material/InsertChartOutlined";
+import DeleteIcon from "@mui/icons-material/Delete";
+import HandymanIcon from "@mui/icons-material/Handyman";
 
 function ExpensesCards() {
   const [expensesData, setExpensesData] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(""); // State for success message
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [selectedExpense, setSelectedExpense] = useState(null);
   const { tripId } = useParams();
   const currentUserId = localStorage.getItem("userId");
   const apiUrl = import.meta.env.VITE_API_URL;
+  const boxRef = useRef(null);
 
+  const deleteExpense = async (tripId, userId, expenseId) => {
+    try {
+      const response = await fetch(
+        `${apiUrl}/expense/removeexpense/${expenseId}`,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: userId, tripId: tripId }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete expense");
+      }
+
+      console.log("Expense deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting expense:", error);
+    }
+  };
+  useEffect(() => {
+    if (boxRef.current) {
+      boxRef.current.scrollTop = boxRef.current.scrollHeight; // Scroll to bottom
+    }
+  }, [expensesData]); // Runs when expenses change
   useEffect(() => {
     const fetchExpenses = async () => {
       setLoading(true);
@@ -38,7 +73,7 @@ function ExpensesCards() {
           {
             method: "GET",
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
 
         if (!response.ok) {
@@ -83,7 +118,7 @@ function ExpensesCards() {
           ? -1
           : b.userId === currentUserId
             ? 1
-            : b.totalExpenses - a.totalExpenses
+            : b.totalExpenses - a.totalExpenses,
       );
   };
 
@@ -155,7 +190,7 @@ function ExpensesCards() {
     userName,
     expenses,
     totalAmountUnpaid,
-    totalAmount
+    totalAmount,
   ) => {
     const filteredExpenses =
       userId === currentUserId
@@ -168,7 +203,7 @@ function ExpensesCards() {
       ${filteredExpenses
         .map(
           (expense) =>
-            `${expense.category} | ₹${expense.amount} | ${expense.desc}`
+            `${expense.category} | ₹${expense.amount} | ${expense.desc}`,
         )
         .join("\n")}
       Total: ₹${userId === currentUserId ? totalAmount : totalAmountUnpaid}`;
@@ -187,7 +222,6 @@ function ExpensesCards() {
         alignItems: "center",
         height: "auto",
         width: "auto",
-        p: 3,
       }}
     >
       {successMessage && (
@@ -226,11 +260,11 @@ function ExpensesCards() {
         sortedExpenses.map(({ userDetails: user, expenses, userId }) => {
           const totalAmount = expenses.reduce(
             (acc, expense) => acc + expense.amount,
-            0
+            0,
           );
           const totalAmountUnpaid = expenses.reduce(
             (acc, expense) => (!expense.paid ? acc + expense.amount : 0),
-            0
+            0,
           );
           const totalAmountPaid = totalAmount - totalAmountUnpaid;
 
@@ -238,7 +272,7 @@ function ExpensesCards() {
             <Card
               key={userId}
               sx={{
-                minWidth: 320,
+                minWidth: 352,
                 maxWidth: "100%",
                 boxShadow: 6,
                 borderRadius: "16px",
@@ -293,8 +327,9 @@ function ExpensesCards() {
                 <TableContainer
                   component={Paper}
                   elevation={0}
+                  ref={boxRef}
                   sx={{
-                    width: "320px", // Set the width to fit the card
+                    width: "352px", // Set the width to fit the card
                     height: { xs: "250px", sm: "250px", md: "300px" }, // Set a fixed height for the table container
                     background: "#f9f9f9",
                     borderRadius: "8px",
@@ -329,6 +364,14 @@ function ExpensesCards() {
                         <TableCell align="left">
                           <strong>Description</strong>
                         </TableCell>
+                        <TableCell align="center">
+                          <strong>
+                            <HandymanIcon
+                              sx={{ height: "20px", width: "20px" }}
+                            />
+                          </strong>{" "}
+                          {/* New Column for Delete */}
+                        </TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -356,6 +399,21 @@ function ExpensesCards() {
                           </TableCell>
 
                           <TableCell align="left">{expense.desc}</TableCell>
+                          <TableCell align="left">
+                            <DeleteIcon
+                              onClick={() => {
+                                if (!expense.paid) {
+                                  setSelectedExpense({ ...expense, userId });
+                                  setOpenDeleteDialog(true);
+                                }
+                              }}
+                              sx={{
+                                cursor: expense.paid ? "default" : "pointer",
+                                opacity: expense.paid ? 0.2 : 1,
+                                pointerEvents: expense.paid ? "none" : "auto",
+                              }}
+                            />
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -460,7 +518,7 @@ function ExpensesCards() {
                         user.name,
                         expenses,
                         totalAmountUnpaid,
-                        totalAmount
+                        totalAmount,
                       )
                     }
                   >
@@ -488,7 +546,7 @@ function ExpensesCards() {
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            height: "100px",
+            height: "100vh",
             textAlign: "center",
             padding: 2,
             background: "linear-gradient(135deg, #6e7aee, #ad79f5)",
@@ -524,6 +582,41 @@ function ExpensesCards() {
           </Box>
         </Box>
       )}
+      <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this expense?
+            <br />
+            <strong>{selectedExpense?.desc || "This item"}</strong>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDeleteDialog(false)} color="inherit">
+            Cancel
+          </Button>
+          <Button
+            color="error"
+            variant="contained"
+            onClick={async () => {
+              if (!selectedExpense) return;
+
+              await deleteExpense(
+                tripId,
+                selectedExpense.userId,
+                selectedExpense._id,
+              );
+
+              setOpenDeleteDialog(false);
+              setSelectedExpense(null);
+
+              window.location.reload();
+            }}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

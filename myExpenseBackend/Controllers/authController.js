@@ -7,7 +7,9 @@ exports.registerUser = async (req, res) => {
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ error: "Account already exists. Please login." });
+      return res
+        .status(400)
+        .json({ error: "Account already exists. Please login." });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -27,7 +29,9 @@ exports.registerUser = async (req, res) => {
       userId: userId,
     });
   } catch (error) {
-    res.status(500).json({ error: "Error creating account. Please try again." });
+    res
+      .status(500)
+      .json({ error: "Error creating account. Please try again." });
   }
 };
 
@@ -37,7 +41,9 @@ exports.loginUser = async (req, res) => {
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ error: "No account found. Please sign up first." });
+      return res
+        .status(400)
+        .json({ error: "No account found. Please sign up first." });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -61,11 +67,11 @@ exports.fetchUpiId = async (req, res) => {
   try {
     const user = await User.findById(req.params.userId);
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
     res.json({ upiId: user.upiId });
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching UPI ID', error });
+    res.status(500).json({ message: "Error fetching UPI ID", error });
   }
 };
 
@@ -79,10 +85,47 @@ exports.updateUpiId = async (req, res) => {
       { new: true, runValidators: true }
     );
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
-    res.status(200).json({ message: 'UPI ID updated successfully', user });
+    res.status(200).json({ message: "UPI ID updated successfully", user });
   } catch (error) {
-    res.status(500).json({ message: 'Error saving UPI ID', error });
+    res.status(500).json({ message: "Error saving UPI ID", error });
+  }
+};
+
+exports.verifyUser = async (req, res) => {
+  try {
+    const { username, email } = req.body;
+    const user = await User.findOne({ username, email });
+
+    if (!user) {
+      return res.status(400).json({
+        error: "Invalid username or email",
+      });
+    }
+
+    res.json({ message: "User verified" });
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const { username, email, newPassword } = req.body;
+    const user = await User.findOne({ username, email });
+
+    if (!user) {
+      return res.status(400).json({
+        error: "Invalid request",
+      });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    res.json({ message: "Password updated successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
   }
 };

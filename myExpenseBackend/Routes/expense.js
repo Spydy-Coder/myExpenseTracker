@@ -9,7 +9,8 @@ const {
   getExpensesRequestByUser,
   saveMarkExpensesPaid,
   saveExpenseRequest,
-  getTotalExpense
+  getTotalExpense,
+  removeExpense
 } = require("../Controllers/expenseController");
 
 // Route to create a new expense entry
@@ -21,7 +22,7 @@ router.get("/requests/:userId", getExpensesRequestByUser);
 // Route to get expenses for a specific trip and user
 router.get("/:tripId/:userId", getExpensesByTripAndUser);
 router.get("/totalexpense/:tripId/:userId", getTotalExpense);
-
+router.delete("/removeexpense/:id",removeExpense);
 // Route to save an expense request
 router.post("/request", saveExpenseRequest);
 router.post("/markAllPaid", saveMarkExpensesPaid);
