@@ -6,6 +6,7 @@ import {
   IconButton,
   useTheme,
   useMediaQuery,
+  Stack,
 } from '@mui/material';
 
 const UseSection = () => {
@@ -25,7 +26,7 @@ const UseSection = () => {
       mobileTop: '18%',
       mobileLeft: '25%',
       title: 'Sign Up / Login',
-      desc: 'Log in or sign up to get started.',
+      desc: 'Create your account and jump right in.',
     },
     {
       id: 2,
@@ -34,7 +35,7 @@ const UseSection = () => {
       mobileTop: '36%',
       mobileLeft: '50%',
       title: 'Create Trip',
-      desc: 'Create a trip and share the code.',
+      desc: 'Start a new trip and share a code with friends.',
     },
     {
       id: 3,
@@ -43,7 +44,7 @@ const UseSection = () => {
       mobileTop: '56%',
       mobileLeft: '65%',
       title: 'Join Trip',
-      desc: 'Join an existing trip using a code.',
+      desc: 'Enter a trip code to join in seconds.',
     },
     {
       id: 4,
@@ -52,7 +53,7 @@ const UseSection = () => {
       mobileTop: '74%',
       mobileLeft: '38%',
       title: 'Add Expense',
-      desc: 'Add expenses and split between members.',
+      desc: 'Log shared costs and split them with ease.',
     },
     {
       id: 5,
@@ -61,7 +62,7 @@ const UseSection = () => {
       mobileTop: '88%',
       mobileLeft: '75%',
       title: 'Request Payment',
-      desc: 'Send payment requests to participants.',
+      desc: 'Send payment requests and settle balances clearly.',
     },
   ];
 
@@ -73,7 +74,30 @@ const UseSection = () => {
   };
 
   return (
-    <Box sx={{ px: { xs: 2, md: 4 }, mb: 10 }}>
+    <Box sx={{ px: { xs: 2, md: 4 }, py: { xs: 6, md: 8 }, bgcolor: 'rgba(248, 251, 255, 0.9)' }}>
+      <Stack spacing={3} sx={{ mb: 4 }}>
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 700,
+            color: '#102a43',
+            textAlign: { xs: 'center', md: 'left' },
+          }}
+        >
+          How it works
+        </Typography>
+        <Typography
+          sx={{
+            lineHeight: 1.8,
+            fontSize: '1.05rem',
+            color: '#486581',
+            maxWidth: 760,
+            textAlign: { xs: 'center', md: 'left' },
+          }}
+        >
+          From creating your trip to settling up at the end, every step is designed to feel quick, clear, and stress-free.
+        </Typography>
+      </Stack>
       <Box
         sx={{
           display: 'flex',
@@ -82,43 +106,44 @@ const UseSection = () => {
           alignItems: 'center',
         }}
       >
-        {/* TEXT SECTION (comes first on mobile) */}
-        <Box
-          sx={{
-            flex: { md: '0 0 45%' },
-            order: { xs: 1, md: 2 }, // ✅ FIX
-          }}
-        >
-          <Typography
-            variant="h2"
-            sx={{
-              fontWeight: 'bold',
-              mb: 3,
-              fontSize: { xs: '2.2rem', md: '3.4rem' },
-              background:
-                'linear-gradient(160deg, #0a6a9b 0%, #44b5ad 100%)',
-              WebkitBackgroundClip: 'text',
-              color: 'transparent',
-            }}
-          >
-            Master Your Expenses on the Go!
-          </Typography>
-
-          <Typography sx={{ lineHeight: 1.9, fontSize: '1.1rem' }}>
-            Track group expenses effortlessly, split costs smartly, and
-            settle payments without confusion. Follow the interactive
-            journey to see how myExpense simplifies every trip.
-          </Typography>
+        <Box sx={{ flex: { md: '0 0 42%' }, width: '100%' }}>
+          <Stack spacing={2}>
+            {['Create a trip', 'Add shared expenses', 'Settle payments'].map((item, index) => (
+              <Paper
+                key={item}
+                elevation={0}
+                sx={{
+                  p: 2,
+                  borderRadius: 3,
+                  border: '1px solid rgba(10, 106, 155, 0.1)',
+                  bgcolor: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: '50%',
+                    bgcolor: 'rgba(68, 181, 173, 0.16)',
+                    color: '#0a6a9b',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 700,
+                  }}
+                >
+                  {index + 1}
+                </Box>
+                <Typography sx={{ fontWeight: 600, color: '#102a43' }}>{item}</Typography>
+              </Paper>
+            ))}
+          </Stack>
         </Box>
 
-        {/* IMAGE SECTION (comes below text on mobile) */}
-        <Box
-          sx={{
-            flex: { md: '0 0 55%' },
-            width: '100%',
-            order: { xs: 2, md: 1 }, // ✅ FIX
-          }}
-        >
+        <Box sx={{ flex: { md: '0 0 58%' }, width: '100%' }}>
           <Box sx={{ position: 'relative', width: '100%' }}>
             <img
               src={imageSrc}
@@ -127,7 +152,8 @@ const UseSection = () => {
                 width: '100%',
                 height: 'auto',
                 display: 'block',
-                borderRadius: '12px',
+                borderRadius: '16px',
+                boxShadow: '0 18px 40px rgba(15, 23, 42, 0.12)',
               }}
             />
 
@@ -156,6 +182,7 @@ const UseSection = () => {
                   width: { xs: 34, md: 40 },
                   height: { xs: 34, md: 40 },
                   fontWeight: 'bold',
+                  boxShadow: '0 10px 24px rgba(68, 181, 173, 0.22)',
                 }}
               >
                 {h.id}
@@ -183,10 +210,7 @@ const UseSection = () => {
                       zIndex: 20,
                     }}
                   >
-                    <Typography
-                      variant="subtitle2"
-                      sx={{ fontWeight: 'bold', mb: 0.5 }}
-                    >
+                    <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 0.5 }}>
                       Step {h.id}: {h.title}
                     </Typography>
                     <Typography variant="body2">{h.desc}</Typography>
