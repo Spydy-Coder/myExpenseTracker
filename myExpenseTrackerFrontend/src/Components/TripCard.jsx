@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { useMemo, useState } from "react";
+import PropTypes from "prop-types";
 import {
   Card as MuiCard,
   CardContent,
@@ -10,8 +11,21 @@ import {
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CheckIcon from "@mui/icons-material/Check";
 
+const tripPhotos = [
+  "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1483683804023-6ccdb62f86ef?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1470770903676-69b98201ea1c?auto=format&fit=crop&w=1200&q=80",
+];
+
+const getRandomTripPhoto = () => {
+  const index = Math.floor(Math.random() * tripPhotos.length);
+  return tripPhotos[index];
+};
+
 const TripCard = ({ photo, tripName, description, date, codeToCopy, onCardClick }) => {
   const [copied, setCopied] = useState(false);
+  const fallbackPhoto = useMemo(() => getRandomTripPhoto(), []);
 
   const handleCopy = (event) => {
     event.stopPropagation(); // Prevent event bubbling to the Card
@@ -28,10 +42,14 @@ const TripCard = ({ photo, tripName, description, date, codeToCopy, onCardClick 
       <CardMedia
         component="img"
         height="140"
-        image={photo}
+        image={photo || fallbackPhoto}
         alt={tripName}
-        onClick={()=>onCardClick(codeToCopy)} // Add onClick here
-        sx={{ cursor: "pointer" }} // Add pointer cursor for better UX
+        onError={(event) => {
+          event.target.onerror = null;
+          event.target.src = fallbackPhoto;
+        }}
+        onClick={() => onCardClick(codeToCopy)}
+        sx={{ cursor: "pointer" }}
       />
 
       {/* Content Section */}
@@ -81,6 +99,15 @@ const TripCard = ({ photo, tripName, description, date, codeToCopy, onCardClick 
       </Box>
     </MuiCard>
   );
+};
+
+TripCard.propTypes = {
+  photo: PropTypes.string,
+  tripName: PropTypes.string.isRequired,
+  description: PropTypes.string,
+  date: PropTypes.string,
+  codeToCopy: PropTypes.string.isRequired,
+  onCardClick: PropTypes.func.isRequired,
 };
 
 export default TripCard;
