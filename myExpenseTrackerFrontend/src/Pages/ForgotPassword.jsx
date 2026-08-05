@@ -31,7 +31,7 @@ const ForgotPassword = () => {
       // Navigate to reset password page with username + email
       navigate("/reset-password", { state: { username, email } });
     } catch (err) {
-      setError("Something went wrong");
+      setError("Something went wrong",err);
     }
   };
 

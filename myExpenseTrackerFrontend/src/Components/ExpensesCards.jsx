@@ -15,6 +15,7 @@ import {
   Paper,
   Button,
   Alert,
+  Avatar,
   Container,
    Dialog,
   DialogTitle,
@@ -546,38 +547,54 @@ function ExpensesCards() {
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            height: "100vh",
+            minHeight: "320px",
             textAlign: "center",
-            padding: 2,
-            background: "linear-gradient(135deg, #6e7aee, #ad79f5)",
-            borderRadius: 2,
-            boxShadow: 3,
-            maxWidth: "600px",
+            padding: 3,
+            background: "linear-gradient(135deg, #5e76f5, #7b61ff)",
+            borderRadius: 3,
+            boxShadow: "0 18px 45px rgba(15, 23, 42, 0.18)",
+            maxWidth: "640px",
             margin: "0 auto",
           }}
         >
-          <Box sx={{ marginRight: 2 }}>
-            <InsertChartOutlinedIcon sx={{ fontSize: 50, color: "#fff" }} />
-          </Box>
-          <Box>
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, width: "100%" }}>
+            <Avatar
+              sx={{
+                bgcolor: "rgba(255, 255, 255, 0.18)",
+                color: "#fff",
+                width: 68,
+                height: 68,
+              }}
+            >
+              <InsertChartOutlinedIcon sx={{ fontSize: 34 }} />
+            </Avatar>
             <Typography
               variant="h5"
               sx={{
                 color: "white",
-                fontWeight: 600,
-                mb: 1,
+                fontWeight: 700,
+                letterSpacing: "0.02em",
               }}
             >
-              Hi Traveller
+              Hi Traveller,
             </Typography>
             <Typography
               variant="body1"
               sx={{
-                color: "white",
-                opacity: 0.8,
+                color: "rgba(255, 255, 255, 0.92)",
+                maxWidth: 460,
               }}
             >
-              No expenses have been created yet.
+              Your trip is ready to be tracked. Add your first expense to start splitting costs and see who owes what.
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "rgba(255, 255, 255, 0.72)",
+                maxWidth: 520,
+              }}
+            >
+              Tap the floating action button in the bottom corner to create an expense, then use the request feature to collect payments.
             </Typography>
           </Box>
         </Box>
