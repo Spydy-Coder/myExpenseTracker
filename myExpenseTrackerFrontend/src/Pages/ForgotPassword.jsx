@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import { Box, TextField, Button, Typography, Card } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Box, TextField, Button, Typography, Card, Avatar, Alert, Link } from "@mui/material";
+import LockResetIcon from "@mui/icons-material/LockReset";
+import { useNavigate, Link as RouterLink } from "react-router-dom";
 
 const ForgotPassword = () => {
   const [username, setUsername] = useState("");
@@ -35,30 +36,82 @@ const ForgotPassword = () => {
   };
 
   return (
-    <Card sx={{ maxWidth: 400, margin: "auto", padding: 3, marginTop: 10 }}>
-      <Box component="form" onSubmit={submit} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        <Typography variant="h4" align="center">Forgot Password</Typography>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        px: 2,
+        py: 6,
+        background: "linear-gradient(180deg, #f5f9ff 0%, #eef7ff 100%)",
+      }}
+    >
+      <Card
+        sx={{
+          width: "100%",
+          maxWidth: 460,
+          borderRadius: 4,
+          boxShadow: "0 24px 60px rgba(15, 23, 42, 0.12)",
+          overflow: "hidden",
+        }}
+      >
+        <Box sx={{ p: { xs: 4, md: 5 }, textAlign: "center" }}>
+          <Avatar
+            sx={{
+              bgcolor: "rgba(68, 181, 173, 0.16)",
+              color: "#0a6a9b",
+              width: 64,
+              height: 64,
+              mx: "auto",
+              mb: 2,
+            }}
+          >
+            <LockResetIcon sx={{ fontSize: 32 }} />
+          </Avatar>
+          <Typography variant="h4" component="h1" sx={{ fontWeight: 800, mb: 1 }}>
+            Forgot Password
+          </Typography>
+          <Typography sx={{ color: "#52667a", mb: 3 }}>
+            Enter your username and email to verify your account and reset your password.
+          </Typography>
 
-        <TextField
-          label="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
+          <Box component="form" onSubmit={submit} sx={{ display: "grid", gap: 2 }}>
+            <TextField
+              label="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              fullWidth
+              required
+            />
+            <TextField
+              label="Email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              fullWidth
+              required
+            />
+            <Button type="submit" variant="contained" size="large" fullWidth sx={{ py: 1.3 }}>
+              Verify Account
+            </Button>
+          </Box>
 
-        <TextField
-          label="Email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+          {error && (
+            <Alert severity="error" sx={{ mt: 3 }}>
+              {error}
+            </Alert>
+          )}
 
-        <Button type="submit" variant="contained">Verify</Button>
-
-        {error && <Typography color="error" align="center">{error}</Typography>}
-      </Box>
-    </Card>
+          <Typography variant="body2" sx={{ mt: 3, color: "#52667a" }}>
+            Remembered your password?{' '}
+            <Link component={RouterLink} to="/login" underline="hover" sx={{ fontWeight: 700 }}>
+              Sign In
+            </Link>
+          </Typography>
+        </Box>
+      </Card>
+    </Box>
   );
 };
 
