@@ -551,9 +551,12 @@ function ExpensesCards() {
             textAlign: "center",
             padding: 3,
             background: "linear-gradient(135deg, #5e76f5, #7b61ff)",
+            width: "100%",
             borderRadius: 3,
+            mx: -3,
+            px: 3,
             boxShadow: "0 18px 45px rgba(15, 23, 42, 0.18)",
-            maxWidth: "640px",
+            maxWidth: "100%",
             margin: "0 auto",
           }}
         >

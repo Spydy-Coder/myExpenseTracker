@@ -83,13 +83,13 @@ function TripContent() {
         alignItems: "center",
         justifyContent: "center",
         height: "auto",
-        width: "auto",
-
+        width: "100%",
+        px: { xs: 2, md: 4 },
         py: 3,
         gap: 3,
         backgroundColor: "#f5f5f5", // Light background for better readability
-        borderRadius: 2,
-        boxShadow: 3,
+        borderRadius: 0,
+        boxShadow: "none",
         position: "relative",
       }}
     >
