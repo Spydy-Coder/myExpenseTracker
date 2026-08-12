@@ -12,7 +12,7 @@ import {
   Avatar,
   Chip,
 } from "@mui/material";
-import { grey, red, green, blue, purple } from "@mui/material/colors";
+import { grey, red, green, blue } from "@mui/material/colors";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import QrCodeHolder from "./QrCodeHolder";
 
@@ -24,9 +24,6 @@ function ExpenseRequest() {
   const apiUrl = import.meta.env.VITE_API_URL;
   const [tooltipText, setTooltipText] = useState("Copy");
   const boxRef = useRef(null);
-
-  const isMobile = window.innerWidth < 768;
-  const isTablet = window.innerWidth >= 768 && window.innerWidth <= 1024;
 
   useEffect(() => {
     if (boxRef.current) {
@@ -63,12 +60,15 @@ function ExpenseRequest() {
   };
 
   const paymentUpiLink = (upiId, amount, username) => {
-    return `upi://pay?pa=${upiId}&am=${amount}&cu=INR&tn=Expense Settlement for ${username}`;
-  };
+    const params = new URLSearchParams({
+      pa: upiId.trim(),
+      pn: username,
+      am: Number(amount).toFixed(2),
+      cu: "INR",
+      tn: `Expense settlement for ${username}`,
+    });
 
-  const handlePaymentUpi = (upiId, amount, username) => {
-    const upiLink = paymentUpiLink(upiId, amount, username);
-    window.location.href = upiLink;
+    return `upi://pay?${params.toString()}`;
   };
 
   useEffect(() => {
@@ -337,22 +337,7 @@ function ExpenseRequest() {
                 >
                   Mark as Paid
                 </Button>
-                {request.money_left >= 0 ||
-                request.payee.upiId === "" ? null : isMobile || isTablet ? (
-                  <Button
-                    variant="contained"
-                    onClick={() =>
-                      handlePaymentUpi(
-                        request.payee.upiId,
-                        Math.abs(request.money_left),
-                        request.payee.username
-                      )
-                    }
-                    sx={{ backgroundColor: purple[300] }}
-                  >
-                    Pay
-                  </Button>
-                ) : (
+                {request.money_left >= 0 || request.payee.upiId === "" ? null : (
                   <QrCodeHolder
                     upiLink={paymentUpiLink(
                       request.payee.upiId,
