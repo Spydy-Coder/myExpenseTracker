@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import PropTypes from "prop-types";
 import {
   Card as MuiCard,
@@ -23,9 +23,13 @@ const getRandomTripPhoto = () => {
   return tripPhotos[index];
 };
 
+const DEFAULT_TRIP_PHOTO =
+  "https://www.shutterstock.com/shutterstock/photos/1247506609/display_1500/stock-vector-cabriolet-car-with-people-diverse-group-of-men-and-women-enjoy-ride-and-music-happy-young-friends-1247506609.jpg";
+
+
 const TripCard = ({ photo, tripName, description, date, codeToCopy, onCardClick }) => {
   const [copied, setCopied] = useState(false);
-  const fallbackPhoto = useMemo(() => getRandomTripPhoto(), []);
+  const imageSrc = photo || DEFAULT_TRIP_PHOTO;
 
   const handleCopy = (event) => {
     event.stopPropagation(); // Prevent event bubbling to the Card
@@ -37,18 +41,17 @@ const TripCard = ({ photo, tripName, description, date, codeToCopy, onCardClick 
   };
 
   return (
-    <MuiCard sx={{ minWidth: 300, boxShadow: 3, borderRadius: 2 }}>
+    <MuiCard sx={{ width: "100%", minWidth: 0, boxShadow: 3, borderRadius: 2 }}>
       {/* Image Section */}
       <CardMedia
         component="img"
         height="140"
-        image={photo || fallbackPhoto}
+        image={imageSrc}
         alt={tripName}
-        onError={(event) => {
-          event.target.onerror = null;
-          event.target.src = fallbackPhoto;
-        }}
         onClick={() => onCardClick(codeToCopy)}
+        onError={(event) => {
+          event.currentTarget.src = DEFAULT_TRIP_PHOTO;
+        }}
         sx={{ cursor: "pointer" }}
       />
 

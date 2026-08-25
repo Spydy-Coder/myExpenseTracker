@@ -18,6 +18,10 @@ const tripSchema = new mongoose.Schema({
     unique: true,
     required: true,
   },
+  photo: {
+    type: String,
+    default: "https://www.shutterstock.com/shutterstock/photos/1247506609/display_1500/stock-vector-cabriolet-car-with-people-diverse-group-of-men-and-women-enjoy-ride-and-music-happy-young-friends-1247506609.jpg",
+  },
   createdBy: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'User',  // Reference to the user who created the trip

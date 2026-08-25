@@ -273,7 +273,8 @@ function ExpensesCards() {
             <Card
               key={userId}
               sx={{
-                minWidth: 352,
+                width: { xs: "100%", sm: 352 },
+                minWidth: 0,
                 maxWidth: "100%",
                 boxShadow: 6,
                 borderRadius: "16px",
@@ -294,7 +295,7 @@ function ExpensesCards() {
                   borderRadius: "4px",
                 },
                 "&:hover": {
-                  transform: "scale(1.05)",
+                  transform: { xs: "none", sm: "scale(1.05)" },
                   boxShadow: 10,
                 },
                 background:
@@ -330,7 +331,7 @@ function ExpensesCards() {
                   elevation={0}
                   ref={boxRef}
                   sx={{
-                    width: "352px", // Set the width to fit the card
+                    width: "100%",
                     height: { xs: "250px", sm: "250px", md: "300px" }, // Set a fixed height for the table container
                     background: "#f9f9f9",
                     borderRadius: "8px",
@@ -353,19 +354,19 @@ function ExpensesCards() {
                     },
                   }}
                 >
-                  <Table>
+                  <Table sx={{ width: "100%", tableLayout: "fixed" }}>
                     <TableHead>
                       <TableRow sx={{ backgroundColor: "#eeeeee" }}>
-                        <TableCell align="left">
+                        <TableCell align="left" sx={{ px: { xs: 1, sm: 2 }, wordBreak: "break-word" }}>
                           <strong>Category</strong>
                         </TableCell>
-                        <TableCell align="left">
+                        <TableCell align="left" sx={{ px: { xs: 1, sm: 2 }, wordBreak: "break-word" }}>
                           <strong>Amount</strong>
                         </TableCell>
-                        <TableCell align="left">
+                        <TableCell align="left" sx={{ px: { xs: 1, sm: 2 }, wordBreak: "break-word" }}>
                           <strong>Description</strong>
                         </TableCell>
-                        <TableCell align="center">
+                        <TableCell align="center" sx={{ px: { xs: 0.5, sm: 2 }, width: { xs: 38, sm: 56 } }}>
                           <strong>
                             <HandymanIcon
                               sx={{ height: "20px", width: "20px" }}
@@ -378,11 +379,13 @@ function ExpensesCards() {
                     <TableBody>
                       {expenses.map((expense) => (
                         <TableRow key={expense._id}>
-                          <TableCell align="left">{expense.category}</TableCell>
+                          <TableCell align="left" sx={{ px: { xs: 1, sm: 2 }, wordBreak: "break-word" }}>{expense.category}</TableCell>
                           <TableCell
                             align="left"
                             sx={{
                               color: expense.paid ? "green" : "red", // Green if true, red if false
+                              px: { xs: 1, sm: 2 },
+                              wordBreak: "break-word",
                             }}
                           >
                             ₹{expense.amount}{" "}
@@ -399,8 +402,8 @@ function ExpensesCards() {
                             </Typography>
                           </TableCell>
 
-                          <TableCell align="left">{expense.desc}</TableCell>
-                          <TableCell align="left">
+                          <TableCell align="left" sx={{ px: { xs: 1, sm: 2 }, wordBreak: "break-word" }}>{expense.desc}</TableCell>
+                          <TableCell align="left" sx={{ px: { xs: 0.5, sm: 2 }, width: { xs: 38, sm: 56 } }}>
                             <DeleteIcon
                               onClick={() => {
                                 if (!expense.paid) {

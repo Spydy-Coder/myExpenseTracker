@@ -6,6 +6,9 @@ import TripCard from "./TripCard";
 import { grey } from "@mui/material/colors";
 import { useNavigate } from "react-router-dom";
 
+const DEFAULT_TRIP_PHOTO =
+  "https://www.shutterstock.com/shutterstock/photos/1247506609/display_1500/stock-vector-cabriolet-car-with-people-diverse-group-of-men-and-women-enjoy-ride-and-music-happy-young-friends-1247506609.jpg";
+
 const TripDetails = () => {
   const [trips, setTrips] = useState([]);
   const userId = localStorage.getItem("userId");
@@ -14,6 +17,8 @@ const TripDetails = () => {
 
   useEffect(() => {
     const fetchTrips = async () => {
+      if (!userId || !apiUrl) return;
+
       try {
         const response = await fetch(`${apiUrl}/trip/user/${userId}`);
         if (!response.ok) {
@@ -27,7 +32,7 @@ const TripDetails = () => {
     };
 
     fetchTrips();
-  }, []);
+  }, [apiUrl, userId]);
 
   const onCardClick = (tripId) => {
     navigate(`/dashboard/trip/${tripId}`);
@@ -83,7 +88,7 @@ const TripDetails = () => {
               }}
             >
               <TripCard
-                photo="https://www.shutterstock.com/shutterstock/photos/1247506609/display_1500/stock-vector-cabriolet-car-with-people-diverse-group-of-men-and-women-enjoy-ride-and-music-happy-young-friends-1247506609.jpg"
+                photo={trip.photo || DEFAULT_TRIP_PHOTO}
                 tripName={trip.tripName}
                 description={trip.desc}
                 date={new Date(trip.date).toLocaleDateString()}

@@ -1,13 +1,11 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Typography,
-  Fab,
+  Button,
   CircularProgress,
   useTheme,
-  useMediaQuery,
 } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
 import ExpensesCards from "./ExpensesCards";
 import SplitExpenseForm from "./SplitExpenseForm";
 import { useParams } from "react-router-dom";
@@ -15,19 +13,23 @@ import ExpensePopup from "./ExpensePopup";
 import CustomSpeedDial from "./CustomSpeedDial";
 import { grey } from "@mui/material/colors";
 import InfoDialog from "./InfoDialog";
+import EditTripForm from "./EditTripForm";
 
 function TripContent() {
   const [isSplitExpenseFormOpen, setSplitExpenseFormOpen] = useState(false);
   const [isExpensePopup, setIsExpensePopup] = useState(false);
   const [expensesUpdated, setExpensesUpdated] = useState(false);
   const [isInfoDialogOpen, setInfoDialogOpen] = useState(false);
+  const [isEditTripOpen, setIsEditTripOpen] = useState(false);
+  const [tripDetails, setTripDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const { tripId } = useParams();
   const userId = localStorage.getItem("userId");
+  const apiUrl = import.meta.env.VITE_API_URL;
 
   // Get current theme and check if it's dark mode
   const theme = useTheme();
-  const isDarkMode = theme.palette.mode === "dark";
+  void theme;
 
   // Handles opening the Split Expense Form
   const handleCreateExpense = () => {
@@ -54,10 +56,35 @@ function TripContent() {
     setIsExpensePopup(false);
   };
 
-  // Simulates loading state (replace this with real data fetching logic)
+  const handleTripUpdated = (updatedTrip) => {
+    setTripDetails(updatedTrip || tripDetails);
+    setExpensesUpdated((prev) => !prev);
+  };
+
   useEffect(() => {
-    setLoading(false); // Simulate data loading (update based on `expensesUpdated`)
-  }, [expensesUpdated]);
+    const fetchTripDetails = async () => {
+      if (!tripId || !apiUrl) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`${apiUrl}/trip/details/${tripId}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch trip details");
+        }
+
+        const data = await response.json();
+        setTripDetails(data);
+      } catch (error) {
+        console.error("Error fetching trip details:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTripDetails();
+  }, [tripId, apiUrl, expensesUpdated]);
 
   // Display loading spinner while data is being fetched
   if (loading) {
@@ -94,33 +121,38 @@ function TripContent() {
       }}
     >
       {/* Title Section */}
-      <Typography
-        variant="h4" // Defines the size and style of the heading
-        component="h1" // Semantic HTML element
-        sx={{
-          color: "primary.main", // Use theme's primary color
-          textAlign: "center", // Center-align the text
-          fontWeight: "bold", // Make the text bold
-          marginTop: 2, // Add margin to the top
-        }}
-      >
-        Who Owes You?
-      </Typography>
-      <Typography
-        variant="caption"
-        sx={{
-          display: "block",
-          color: grey[700],
-
-          mx: 2,
-          textAlign: "center",
-          fontStyle: "italic",
-        }}
-        gutterBottom // Adds spacing below the heading
-      >
-        * Track and manage expenses effortlessly – see who owes you and ensure
-        every split is settled smoothly.
-      </Typography>
+      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
+        <Typography
+          variant="h4"
+          component="h1"
+          sx={{
+            color: "primary.main",
+            textAlign: "center",
+            fontWeight: "bold",
+            marginTop: 2,
+          }}
+        >
+          {tripDetails?.tripName || "Who Owes You?"}
+        </Typography>
+        <Typography
+          variant="body2"
+          sx={{
+            display: "block",
+            color: grey[700],
+            mx: 2,
+            textAlign: "center",
+          }}
+        >
+          {tripDetails?.desc || "Track and manage expenses effortlessly – see who owes you and ensure every split is settled smoothly."}
+        </Typography>
+        <Button
+          variant="outlined"
+          onClick={() => setIsEditTripOpen(true)}
+          sx={{ mt: 1 }}
+        >
+          Edit trip details
+        </Button>
+      </Box>
 
       {/* Expenses Cards */}
       <ExpensesCards key={expensesUpdated} />
@@ -154,6 +186,14 @@ function TripContent() {
         onClose={closeSplitExpenseForm}
       />
       <InfoDialog open={isInfoDialogOpen} handleClose={handleCloseInfoDialog} />
+      {tripId && (
+        <EditTripForm
+          open={isEditTripOpen}
+          onClose={() => setIsEditTripOpen(false)}
+          tripId={tripId}
+          onTripUpdated={handleTripUpdated}
+        />
+      )}
     </Box>
   );
 }

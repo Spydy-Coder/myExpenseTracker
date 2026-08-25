@@ -6,17 +6,67 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import Box from "@mui/material/Box";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import UniqueIdPopup from "./UniqueIdPopup";
 import { useState } from "react";
 
+const DEFAULT_TRIP_PHOTO =
+  "https://www.shutterstock.com/shutterstock/photos/1247506609/display_1500/stock-vector-cabriolet-car-with-people-diverse-group-of-men-and-women-enjoy-ride-and-music-happy-young-friends-1247506609.jpg";
+
+const compressImage = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const maxWidth = 1200;
+        const scale = Math.min(1, maxWidth / img.width);
+
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        resolve(canvas.toDataURL("image/jpeg", 0.7));
+      };
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
 export default function CreateTripForm({ open, onClose }) {
   const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedPhoto, setSelectedPhoto] = useState("");
   const [openUnique, setOpenUnique] = useState(false);
   const [uniqueId, setUniqueId] = useState("");
   const apiUrl = import.meta.env.VITE_API_URL;
+
+  const handlePhotoChange = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      setSelectedPhoto("");
+      return;
+    }
+
+    try {
+      const compressed = await compressImage(file);
+      setSelectedPhoto(compressed);
+    } catch (error) {
+      console.error("Error compressing image:", error);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSelectedPhoto(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -33,6 +83,7 @@ export default function CreateTripForm({ open, onClose }) {
     // Add the user ID, unique ID, and selected date to the form data
     formJson.createdBy = userId;
     formJson.date = selectedDate ? selectedDate.toISOString() : null; // Convert to ISO format for consistency
+    formJson.photo = selectedPhoto || DEFAULT_TRIP_PHOTO;
 
     try {
       const response = await fetch(`${apiUrl}/trip/create`, {
@@ -115,6 +166,29 @@ export default function CreateTripForm({ open, onClose }) {
               )}
             />
           </LocalizationProvider>
+
+          <TextField
+            margin="dense"
+            name="photo"
+            label="Trip Photo"
+            type="file"
+            fullWidth
+            variant="standard"
+            InputLabelProps={{ shrink: true }}
+            inputProps={{ accept: "image/*" }}
+            onChange={handlePhotoChange}
+            sx={{ mb: 2 }}
+          />
+
+          {selectedPhoto && (
+            <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+              <img
+                src={selectedPhoto}
+                alt="Trip preview"
+                style={{ width: "100%", maxHeight: 180, objectFit: "cover", borderRadius: 8 }}
+              />
+            </Box>
+          )}
         </DialogContent>
         <DialogActions>
           <Button

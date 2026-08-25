@@ -6,8 +6,9 @@ const { nanoid } = require("nanoid");
 // Create a new trip
 exports.createTrip = async (req, res) => {
   try {
-    const { tripName, desc, date, createdBy } = req.body;
+    const { tripName, desc, date, createdBy, photo } = req.body;
     const uniqueId = nanoid(8);
+    const defaultPhoto = "https://www.shutterstock.com/shutterstock/photos/1247506609/display_1500/stock-vector-cabriolet-car-with-people-diverse-group-of-men-and-women-enjoy-ride-and-music-happy-young-friends-1247506609.jpg";
 
     // Ensure all required fields are provided
     if (!tripName || !desc || !date || !createdBy) {
@@ -20,6 +21,7 @@ exports.createTrip = async (req, res) => {
       desc,
       date,
       uniqueId, // Auto-generate uniqueId
+      photo: photo || defaultPhoto,
       createdBy,
       members: [createdBy], // Initialize with members if provided
     });
@@ -37,6 +39,50 @@ exports.createTrip = async (req, res) => {
     });
   } catch (err) {
     res.status(400).json({ error: err.message });
+  }
+};
+
+exports.getTripById = async (req, res) => {
+  const { tripId } = req.params;
+
+  try {
+    const trip = await Trip.findOne({ uniqueId: tripId });
+
+    if (!trip) {
+      return res.status(404).json({ message: "Trip not found" });
+    }
+
+    res.status(200).json(trip);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching trip", error });
+  }
+};
+
+exports.updateTrip = async (req, res) => {
+  const { tripId } = req.params;
+  const { tripName, desc, date, photo } = req.body;
+  const defaultPhoto = "https://www.shutterstock.com/shutterstock/photos/1247506609/display_1500/stock-vector-cabriolet-car-with-people-diverse-group-of-men-and-women-enjoy-ride-and-music-happy-young-friends-1247506609.jpg";
+
+  try {
+    const trip = await Trip.findOne({ uniqueId: tripId });
+
+    if (!trip) {
+      return res.status(404).json({ message: "Trip not found" });
+    }
+
+    if (tripName) trip.tripName = tripName;
+    if (desc) trip.desc = desc;
+    if (date) trip.date = date;
+    trip.photo = photo || trip.photo || defaultPhoto;
+
+    await trip.save();
+
+    res.status(200).json({
+      message: "Trip updated successfully",
+      trip,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating trip", error });
   }
 };
 
