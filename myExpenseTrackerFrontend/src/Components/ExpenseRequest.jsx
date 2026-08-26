@@ -15,6 +15,7 @@ import {
 import { grey, red, green, blue } from "@mui/material/colors";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import QrCodeHolder from "./QrCodeHolder";
+import { formatCurrency } from "../utils/currency";
 
 function ExpenseRequest() {
   const userId = localStorage.getItem("userId");
@@ -246,10 +247,10 @@ function ExpenseRequest() {
             {/* Expense Details */}
             <Box sx={{ mb: 2 }}>
               <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                <strong>To be Sent:</strong> ₹{request.total_money}
+                <strong>To be Sent:</strong> ₹{formatCurrency(request.total_money)}
               </Typography>
               <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                <strong>To be Received:</strong> ₹{request.moneyToBeReceive}
+                <strong>To be Received:</strong> ₹{formatCurrency(request.moneyToBeReceive)}
               </Typography>
               <Divider sx={{ mb: 2 }} />
               <Typography
@@ -264,7 +265,7 @@ function ExpenseRequest() {
                 {request.money_left > 0
                   ? "You will receive"
                   : "You will have to send"}{" "}
-                ₹{Math.abs(request.money_left)}
+                ₹{formatCurrency(Math.abs(request.money_left))}
               </Typography>
             </Box>
 
@@ -300,7 +301,7 @@ function ExpenseRequest() {
                     justifyContent: "space-between",
                   }}
                 >
-                  - {expense.category}: ₹{expense.amount} ({expense.desc})
+                  - {expense.category}: ₹{formatCurrency(expense.amount)} ({expense.desc})
                   <span
                     style={{
                       color: expense.paid ? green[600] : red[600],
@@ -341,7 +342,7 @@ function ExpenseRequest() {
                   <QrCodeHolder
                     upiLink={paymentUpiLink(
                       request.payee.upiId,
-                      Math.abs(request.money_left),
+                      Number(formatCurrency(Math.abs(request.money_left))),
                       request.payee.username
                     )}
                   />

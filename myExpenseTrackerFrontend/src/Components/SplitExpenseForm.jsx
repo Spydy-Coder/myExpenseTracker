@@ -18,6 +18,26 @@ import {
 import { useParams } from "react-router-dom";
 import NewCategoryForm from "./NewCategoryForm";
 import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
+import {
+  formatCurrency,
+  toMinorUnits,
+} from "../utils/currency";
+
+const isCurrencyInput = (value) => /^\d*(?:\.\d{0,2})?$/.test(value);
+const formatMinorUnits = (minorUnits) => (minorUnits / 100).toFixed(2);
+
+const splitMinorUnits = (minorUnits, memberIds) => {
+  const baseAmount = Math.floor(minorUnits / memberIds.length);
+  const remainder = minorUnits % memberIds.length;
+
+  return memberIds.reduce(
+    (split, memberId, index) => ({
+      ...split,
+      [memberId]: formatMinorUnits(baseAmount + (index < remainder ? 1 : 0)),
+    }),
+    {},
+  );
+};
 
 export default function SplitExpenseForm({ open, onClose }) {
   const [categories, setCategories] = useState(["Others"]); // Categories
@@ -122,8 +142,13 @@ export default function SplitExpenseForm({ open, onClose }) {
 
   // Handle total money input
   const handleTotalMoneyChange = (event) => {
-    if (event.target.value >= 0) setTotalMoney(event.target.value);
-    setError(""); // Clear error when total money is changed
+    const value = event.target.value;
+    if (isCurrencyInput(value)) {
+      setTotalMoney(value);
+      setError("");
+    } else {
+      setError("Amounts can have at most 2 decimal places.");
+    }
   };
   const handleDescriptionChange = (event) => {
     setDescription(event.target.value);
@@ -148,12 +173,17 @@ export default function SplitExpenseForm({ open, onClose }) {
   // Handle amount input for each selected username
   const handleAmountChange = (userId, event) => {
     const newAmount = event.target.value;
+    if (!isCurrencyInput(newAmount)) {
+      setError("Amounts can have at most 2 decimal places.");
+      return;
+    }
+
     const newAmounts = { ...amounts, [userId]: newAmount };
     const total = Object.keys(newAmounts)
       .filter((key) => selectedOptions.includes(key)) // Only include selected users by id
-      .reduce((sum, key) => sum + Number(newAmounts[key] || 0), 0); // Calculate sum
+      .reduce((sum, key) => sum + toMinorUnits(newAmounts[key]), 0);
 
-    if (total > Number(totalMoney)) {
+    if (total > toMinorUnits(totalMoney)) {
       setError("The sum of the amounts cannot exceed the total money.");
     } else {
       setError(""); // Clear error
@@ -163,26 +193,20 @@ export default function SplitExpenseForm({ open, onClose }) {
 
   // Handle split equally functionality
   const handleSplitEqually = () => {
-    if (selectedOptions.length > 0) {
-      const equalAmount = (Number(totalMoney) / selectedOptions.length).toFixed(
-        2
-      );
-      const splitAmounts = selectedOptions.reduce(
-        (acc, userId) => ({ ...acc, [userId]: equalAmount }),
-        {}
-      );
-      setAmounts(splitAmounts);
-      setError(""); // Clear error
+    const totalInMinorUnits = toMinorUnits(totalMoney);
+    if (selectedOptions.length > 0 && totalInMinorUnits >= 0) {
+      setAmounts(splitMinorUnits(totalInMinorUnits, selectedOptions));
+      setError("");
     }
   };
 
   // Handle "Split Rest" functionality
   const handleSplitRest = () => {
     const totalUsed = selectedOptions.reduce(
-      (sum, userId) => sum + Number(amounts[userId] || 0),
+      (sum, userId) => sum + toMinorUnits(amounts[userId]),
       0
     );
-    const remaining = Number(totalMoney) - totalUsed;
+    const remaining = toMinorUnits(totalMoney) - totalUsed;
 
     if (remaining < 0) {
       setError("The sum of the amounts exceeds the total money.");
@@ -194,12 +218,10 @@ export default function SplitExpenseForm({ open, onClose }) {
     );
 
     if (optionsToSplit.length > 0) {
-      const equalSplit = (remaining / optionsToSplit.length).toFixed(2);
-      const updatedAmounts = { ...amounts };
-
-      optionsToSplit.forEach((userId) => {
-        updatedAmounts[userId] = equalSplit;
-      });
+      const updatedAmounts = {
+        ...amounts,
+        ...splitMinorUnits(remaining, optionsToSplit),
+      };
 
       setAmounts(updatedAmounts);
       setError(""); // Clear error
@@ -234,11 +256,11 @@ export default function SplitExpenseForm({ open, onClose }) {
     event.preventDefault();
 
     const total = selectedOptions.reduce(
-      (sum, userId) => sum + Number(amounts[userId] || 0),
+      (sum, userId) => sum + toMinorUnits(amounts[userId]),
       0
     );
 
-    if (total > Number(totalMoney)) {
+    if (total > toMinorUnits(totalMoney)) {
       setError("The sum of the amounts exceeds the total money.");
       return;
     }
@@ -247,11 +269,11 @@ export default function SplitExpenseForm({ open, onClose }) {
       tripId,
       category: selectedCategory,
       description,
-      totalMoney: Number(totalMoney),
+      totalMoney: Number(formatCurrency(totalMoney)),
       issuedBy: userId, // Replace with actual user ID
       members: selectedOptions.map((id) => ({
         userId: id,
-        amount: Number(amounts[id]),
+        amount: Number(formatCurrency(amounts[id])),
       })),
     };
 
@@ -341,6 +363,7 @@ export default function SplitExpenseForm({ open, onClose }) {
               fullWidth
               value={totalMoney}
               onChange={handleTotalMoneyChange}
+              inputProps={{ min: 0, step: 0.01 }}
               sx={{ mb: 2 }}
             />
 
@@ -395,6 +418,7 @@ export default function SplitExpenseForm({ open, onClose }) {
                           handleAmountChange(member.id, event)
                         }
                         sx={{ width: "150px" }}
+                        inputProps={{ min: 0, step: 0.01 }}
                       />
                     )}
                   </Box>

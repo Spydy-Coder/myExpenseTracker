@@ -11,20 +11,8 @@ import {
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CheckIcon from "@mui/icons-material/Check";
 
-const tripPhotos = [
-  "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
-  "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
-  "https://images.unsplash.com/photo-1483683804023-6ccdb62f86ef?auto=format&fit=crop&w=1200&q=80",
-  "https://images.unsplash.com/photo-1470770903676-69b98201ea1c?auto=format&fit=crop&w=1200&q=80",
-];
-
-const getRandomTripPhoto = () => {
-  const index = Math.floor(Math.random() * tripPhotos.length);
-  return tripPhotos[index];
-};
-
 const DEFAULT_TRIP_PHOTO =
-  "https://www.shutterstock.com/shutterstock/photos/1247506609/display_1500/stock-vector-cabriolet-car-with-people-diverse-group-of-men-and-women-enjoy-ride-and-music-happy-young-friends-1247506609.jpg";
+  "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80";
 
 
 const TripCard = ({ photo, tripName, description, date, codeToCopy, onCardClick }) => {
@@ -50,6 +38,7 @@ const TripCard = ({ photo, tripName, description, date, codeToCopy, onCardClick 
         alt={tripName}
         onClick={() => onCardClick(codeToCopy)}
         onError={(event) => {
+          event.currentTarget.onerror = null;
           event.currentTarget.src = DEFAULT_TRIP_PHOTO;
         }}
         sx={{ cursor: "pointer" }}

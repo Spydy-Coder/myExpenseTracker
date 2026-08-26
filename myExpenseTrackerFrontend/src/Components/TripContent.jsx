@@ -4,6 +4,8 @@ import {
   Typography,
   Button,
   CircularProgress,
+  Snackbar,
+  Alert,
   useTheme,
 } from "@mui/material";
 import ExpensesCards from "./ExpensesCards";
@@ -21,6 +23,7 @@ function TripContent() {
   const [expensesUpdated, setExpensesUpdated] = useState(false);
   const [isInfoDialogOpen, setInfoDialogOpen] = useState(false);
   const [isEditTripOpen, setIsEditTripOpen] = useState(false);
+  const [isEditSuccessOpen, setIsEditSuccessOpen] = useState(false);
   const [tripDetails, setTripDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const { tripId } = useParams();
@@ -59,6 +62,7 @@ function TripContent() {
   const handleTripUpdated = (updatedTrip) => {
     setTripDetails(updatedTrip || tripDetails);
     setExpensesUpdated((prev) => !prev);
+    setIsEditSuccessOpen(true);
   };
 
   useEffect(() => {
@@ -194,6 +198,20 @@ function TripContent() {
           onTripUpdated={handleTripUpdated}
         />
       )}
+      <Snackbar
+        open={isEditSuccessOpen}
+        autoHideDuration={3000}
+        onClose={() => setIsEditSuccessOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          severity="success"
+          variant="filled"
+          onClose={() => setIsEditSuccessOpen(false)}
+        >
+          Trip details edited successfully.
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
