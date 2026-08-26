@@ -1,4 +1,5 @@
 import * as React from "react";
+import PropTypes from "prop-types";
 import Button from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
 import Dialog from "@mui/material/Dialog";
@@ -9,11 +10,11 @@ import DownloadIcon from "@mui/icons-material/Download";
 import { QRCode } from "react-qr-code";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import GooglePayIcon from "/images/gpay.png"; // Replace with your image path
 import PhonePeIcon from "/images/phonepe.png"; // Replace with your image path
 import PaytmIcon from "/images/paytm.png"; // Replace with your image path
 import BhimIcon from "/images/bhim.png"; // Replace with your image path
-import AmazonPay from "/images/amazon-pay.png"; // Replace with your image path
 import Mobikwik from "/images/mobikwik.png"; // Replace with your image path
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -32,6 +33,9 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 export default function QrCodeHolder({ upiLink }) {
   const [open, setOpen] = React.useState(false);
   const qrCodeRef = React.useRef(null);
+  const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const isSmallViewport = useMediaQuery("(max-width:600px)");
+  const shouldOpenUpiApp = isMobileDevice || isSmallViewport;
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -39,6 +43,10 @@ export default function QrCodeHolder({ upiLink }) {
 
   const handleClose = () => {
     setOpen(false);
+  };
+
+  const handlePayNow = () => {
+    window.location.href = upiLink;
   };
 
   const handleDownload = () => {
@@ -59,9 +67,22 @@ export default function QrCodeHolder({ upiLink }) {
 
   return (
     <React.Fragment>
-      <Button variant="outlined" onClick={handleClickOpen}>
-        Show payment QR
-      </Button>
+      <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 1 }}>
+        {shouldOpenUpiApp ? (
+          <>
+            <Button variant="outlined" onClick={handleClickOpen}>
+              Show QR
+            </Button>
+            <Button variant="contained" onClick={handlePayNow}>
+              Pay now
+            </Button>
+          </>
+        ) : (
+          <Button variant="outlined" onClick={handleClickOpen}>
+            Download QR
+          </Button>
+        )}
+      </Box>
       <BootstrapDialog
         onClose={handleClose}
         aria-labelledby="customized-dialog-title"
@@ -134,3 +155,7 @@ export default function QrCodeHolder({ upiLink }) {
     </React.Fragment>
   );
 }
+
+QrCodeHolder.propTypes = {
+  upiLink: PropTypes.string.isRequired,
+};

@@ -19,6 +19,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: '', // Can be empty initially
   },
+  upiPhoneNumber: {
+    type: String,
+    default: '',
+  },
   trips: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Trip' }],
 }, { timestamps: true });
 

@@ -4,28 +4,30 @@ import { Box, Modal, Typography, TextField, Button } from "@mui/material";
 
 const UpiForm = ({ open, onClose }) => {
   const [upiId, setUpiId] = useState("");
+  const [upiPhoneNumber, setUpiPhoneNumber] = useState("");
   const [error, setError] = useState("");
   const apiUrl = import.meta.env.VITE_API_URL 
 
   useEffect(() => {
-    // Fetch existing UPI ID from the backend (if any)
+    // Fetch the existing UPI phone number from the backend (if any)
     const fetchUpiId = async () => {
       try {
         const userId = localStorage.getItem("userId");
         const response = await fetch(`${apiUrl}/api/auth/user/upi/${userId}`, {
-          method: "GET",  // Use GET method to fetch UPI ID
+          method: "GET",
           headers: { "Content-Type": "application/json" },
         });
         if (response.ok) {
           const data = await response.json();
           setUpiId(data.upiId || "");
+          setUpiPhoneNumber(data.upiPhoneNumber || "");
           setError("")
         } else {
-          throw new Error("Failed to fetch UPI ID");
+          throw new Error("Failed to fetch payment details");
         }
       } catch (err) {
         console.error(err);
-        setError("Error fetching UPI ID");
+        setError("Error fetching payment details");
       }
     };
 
@@ -38,20 +40,20 @@ const UpiForm = ({ open, onClose }) => {
     try {
       const userId = localStorage.getItem("userId");
       const response = await fetch(`${apiUrl}/api/auth/user/upi/${userId}`, {
-        method: "POST",  // Use POST method to update UPI ID
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ upiId }),
+        body: JSON.stringify({ upiId, upiPhoneNumber }),
       });
 
       if (response.ok) {
         onClose(); // Close form after successful save
         setError("")
       } else {
-        throw new Error("Failed to update UPI ID");
+        throw new Error("Failed to update payment details");
       }
     } catch (err) {
       console.error(err);
-      setError("Error saving UPI ID");
+      setError("Error saving payment details");
     }
   };
 
@@ -70,16 +72,26 @@ const UpiForm = ({ open, onClose }) => {
         borderRadius: 2
       }}>
         <Typography variant="h6" component="h2" mb={2}>
-          Manage Your UPI ID
+          Manage Payment Details
         </Typography>
         <TextField
           fullWidth
-          label="UPI ID"
+          required
+          label="UPI ID (required for QR payments)"
           value={upiId}
           onChange={(e) => setUpiId(e.target.value)}
+          placeholder="example@upi"
+          sx={{ mb: 2 }}
+        />
+        <TextField
+          fullWidth
+          label="UPI Phone Number (optional)"
+          value={upiPhoneNumber}
+          onChange={(e) => setUpiPhoneNumber(e.target.value)}
           error={Boolean(error)}
           helperText={error}
-          placeholder="example@upi"
+          placeholder="9876543210"
+          inputProps={{ inputMode: "numeric", maxLength: 10 }}
         />
         <Button
           variant="contained"

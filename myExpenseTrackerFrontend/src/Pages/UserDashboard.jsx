@@ -195,7 +195,7 @@ function UserDashboard(props) {
     },
     {
       segment: "upi",
-      title: <Typography onClick={handleOpenUpiForm}>Manage UPI ID</Typography>,
+      title: <Typography onClick={handleOpenUpiForm}>Manage Payment Details</Typography>,
       icon: (
         <AccountBalanceWalletIcon
           onClick={handleOpenUpiForm}

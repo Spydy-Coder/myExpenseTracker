@@ -59,13 +59,11 @@ function ExpenseRequest() {
     }
   }, [apiUrl, userId]);
 
-  const paymentUpiLink = (upiId, amount, username) => {
+  const paymentUpiLink = (upiId, amount, description) => {
     const params = new URLSearchParams({
       pa: upiId.trim(),
-      pn: username,
       am: Number(amount).toFixed(2),
-      cu: "INR",
-      tn: `Expense settlement for ${username}`,
+      tn: description,
     });
 
     return `upi://pay?${params.toString()}`;
@@ -238,13 +236,13 @@ function ExpenseRequest() {
                     overflowWrap: "anywhere",
                   }}
                 >
-                  <strong>UPI ID:</strong>{" "}
-                  {request.payee.upiId === ""
+                  <strong>UPI Phone Number:</strong>{" "}
+                  {request.payee.upiPhoneNumber === ""
                     ? "Not Available"
-                    : request.payee.upiId}
+                    : request.payee.upiPhoneNumber}
                 </Typography>
                 <Tooltip title={tooltipText}>
-                  <IconButton onClick={() => handleCopy(request.payee.upiId)}>
+                  <IconButton onClick={() => handleCopy(request.payee.upiPhoneNumber)}>
                     <ContentCopyIcon sx={{ fontSize: 18 }} />
                   </IconButton>
                 </Tooltip>
@@ -351,15 +349,27 @@ function ExpenseRequest() {
                 >
                   Mark as Paid
                 </Button>
-                {request.money_left >= 0 || request.payee.upiId === "" ? null : (
-                  <QrCodeHolder
-                    upiLink={paymentUpiLink(
-                      request.payee.upiId,
-                      Number(formatCurrency(Math.abs(request.money_left))),
-                      request.payee.username
-                    )}
-                  />
-                )}
+                {request.money_left < 0 &&
+                  (request.payee.upiId ? (
+                    <QrCodeHolder
+                      upiLink={paymentUpiLink(
+                        request.payee.upiId,
+                        Number(formatCurrency(Math.abs(request.money_left))),
+                        request.expenses
+                          .map((expense) => expense.desc)
+                          .filter(Boolean)
+                          .join(", ") || "Expense settlement",
+                      )}
+                    />
+                  ) : (
+                    <Tooltip title="The payee has not added a valid UPI ID for QR payments yet.">
+                      <span>
+                        <Button variant="outlined" disabled>
+                          Pay now
+                        </Button>
+                      </span>
+                    </Tooltip>
+                  ))}
               </Box>
 
               <Typography

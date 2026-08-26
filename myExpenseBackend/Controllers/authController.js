@@ -69,27 +69,44 @@ exports.fetchUpiId = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    res.json({ upiId: user.upiId });
+    res.json({
+      upiId: user.upiId || "",
+      upiPhoneNumber: user.upiPhoneNumber || "",
+    });
   } catch (error) {
     res.status(500).json({ message: "Error fetching UPI ID", error });
   }
 };
 
-// Update UPI ID for a user
+// Update the UPI phone number for a user
 exports.updateUpiId = async (req, res) => {
   try {
-    const { upiId } = req.body;
+    const upiId = String(req.body.upiId || "").trim().toLowerCase();
+    const phoneNumber = String(req.body.upiPhoneNumber || "").replace(/\D/g, "");
+    const upiPhoneNumber =
+      phoneNumber.length === 12 && phoneNumber.startsWith("91")
+        ? phoneNumber.slice(2)
+        : phoneNumber;
+
+    if (!/^[a-z0-9._-]+@[a-z0-9.-]+$/i.test(upiId)) {
+      return res.status(400).json({ message: "Enter a valid UPI ID, for example name@bank" });
+    }
+
+    if (upiPhoneNumber && !/^\d{10}$/.test(upiPhoneNumber)) {
+      return res.status(400).json({ message: "Enter a valid 10-digit UPI phone number" });
+    }
+
     const user = await User.findByIdAndUpdate(
       req.params.userId,
-      { upiId },
+      { upiId, upiPhoneNumber },
       { new: true, runValidators: true }
     );
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    res.status(200).json({ message: "UPI ID updated successfully", user });
+    res.status(200).json({ message: "Payment details updated successfully", user });
   } catch (error) {
-    res.status(500).json({ message: "Error saving UPI ID", error });
+    res.status(500).json({ message: "Error saving payment details", error });
   }
 };
 

@@ -25,7 +25,7 @@ export default function InfoDialog({ open, handleClose }) {
     respective group members. However, please note that once the request
     has been sent and the amount has been paid, the split cannot be deleted.
     <br /><br />
-    ℹ️ Don’t forget to add your UPI ID through the 'Manage UPI ID' section for easy and seamless transfers.
+    ℹ️ Add your UPI ID through the 'Manage Payment Details' section to receive QR payments.
   </DialogContentText>
 </DialogContent>
 
