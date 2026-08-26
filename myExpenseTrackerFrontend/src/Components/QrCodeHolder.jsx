@@ -35,6 +35,7 @@ export default function QrCodeHolder({ upiLink, upiPhoneNumber, amount }) {
   const [open, setOpen] = React.useState(false);
   const [payOpen, setPayOpen] = React.useState(false);
   const [copied, setCopied] = React.useState(false);
+  const [amountCopied, setAmountCopied] = React.useState(false);
   const qrCodeRef = React.useRef(null);
   const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const isSmallViewport = useMediaQuery("(max-width:600px)");
@@ -59,8 +60,9 @@ export default function QrCodeHolder({ upiLink, upiPhoneNumber, amount }) {
     setCopied(true);
   };
 
-  const handleOpenUpiApp = () => {
-    window.location.href = "upi://pay";
+  const handleCopyAmount = async () => {
+    await navigator.clipboard.writeText(amount);
+    setAmountCopied(true);
   };
 
   const handleDownload = () => {
@@ -201,8 +203,8 @@ export default function QrCodeHolder({ upiLink, upiPhoneNumber, amount }) {
                 {copied ? "Copied" : "Copy mobile number"}
               </Button>
             )}
-            <Button variant="contained" onClick={handleOpenUpiApp}>
-              Open UPI app
+            <Button variant="contained" onClick={handleCopyAmount}>
+              {amountCopied ? "Amount copied" : "Copy amount"}
             </Button>
           </Box>
         </DialogContent>
