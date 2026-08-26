@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import {
   Card,
   CardContent,
@@ -9,7 +9,6 @@ import {
   Button,
   Tooltip,
   IconButton,
-  Avatar,
   Chip,
 } from "@mui/material";
 import { grey, red, green, blue } from "@mui/material/colors";
@@ -38,7 +37,7 @@ function ExpenseRequest() {
     setTimeout(() => setTooltipText("Copy"), 2000); // Reset tooltip after 2 seconds
   };
 
-  const fetchExpenseRequests = async () => {
+  const fetchExpenseRequests = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch(`${apiUrl}/expense/requests/${userId}`, {
@@ -58,7 +57,7 @@ function ExpenseRequest() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [apiUrl, userId]);
 
   const paymentUpiLink = (upiId, amount, username) => {
     const params = new URLSearchParams({
@@ -74,7 +73,7 @@ function ExpenseRequest() {
 
   useEffect(() => {
     fetchExpenseRequests();
-  }, [userId]);
+  }, [fetchExpenseRequests]);
 
   const handleMarkAsPaid = async (tripId, payee, expenses) => {
     const currentUserId = localStorage.getItem("userId");
@@ -143,7 +142,9 @@ function ExpenseRequest() {
         gap: 3,
         justifyContent: "center",
         alignItems: "flex-start",
-        p: 3,
+        width: "100%",
+        minWidth: 0,
+        p: { xs: 1, sm: 3 },
         backgroundColor: "#f5f5f5", // Light background for the page
       }}
     >
@@ -151,8 +152,11 @@ function ExpenseRequest() {
         <Card
           key={request.trip_id}
           sx={{
-            width: 350,
-            height: 550, // Fixed card height
+            width: { xs: "100%", sm: 350 },
+            minWidth: 0,
+            maxWidth: "100%",
+            minHeight: 550,
+            height: "auto",
             boxShadow: 3,
             borderRadius: "16px",
             overflow: "hidden",
@@ -170,7 +174,8 @@ function ExpenseRequest() {
               flexDirection: "column",
               justifyContent: "space-between",
               height: "100%",
-              padding: "24px",
+              minWidth: 0,
+              p: { xs: 2, sm: 3 },
             }}
           >
             {/* Payment Status */}
@@ -202,6 +207,7 @@ function ExpenseRequest() {
                 sx={{
                   fontWeight: "bold",
                   color: blue[800],
+                  overflowWrap: "anywhere",
                 }}
               >
                 Trip ID: {request.trip_id}
@@ -210,6 +216,7 @@ function ExpenseRequest() {
                 variant="subtitle1"
                 sx={{
                   color: grey[700],
+                  overflowWrap: "anywhere",
                 }}
               >
                 <strong>Payee:</strong> {request.payee.username}
@@ -217,6 +224,7 @@ function ExpenseRequest() {
               <Box
                 sx={{
                   display: "flex",
+                  flexWrap: "wrap",
                   alignItems: "center",
                   justifyContent: "center",
                   gap: 1,
@@ -227,6 +235,7 @@ function ExpenseRequest() {
                   variant="subtitle1"
                   sx={{
                     color: grey[700],
+                    overflowWrap: "anywhere",
                   }}
                 >
                   <strong>UPI ID:</strong>{" "}
@@ -298,7 +307,10 @@ function ExpenseRequest() {
                     color: grey[600],
                     mb: 0.5,
                     display: "flex",
+                    flexWrap: "wrap",
+                    gap: 0.5,
                     justifyContent: "space-between",
+                    overflowWrap: "anywhere",
                   }}
                 >
                   - {expense.category}: ₹{formatCurrency(expense.amount)} ({expense.desc})
@@ -320,9 +332,10 @@ function ExpenseRequest() {
                 sx={{
                   mt: 2,
                   display: "flex",
+                  flexWrap: "wrap",
                   justifyContent: "center",
                   alignItems: "center",
-                  gap: "16px",
+                  gap: 1,
                 }}
               >
                 <Button
@@ -359,7 +372,7 @@ function ExpenseRequest() {
                   fontStyle: "italic",
                 }}
               >
-                * Click this button after you've paid or received the amount.
+                * Click this button after you&apos;ve paid or received the amount.
               </Typography>
             </Box>
           </CardContent>
