@@ -27,6 +27,7 @@ import { useParams } from "react-router-dom";
 import InsertChartOutlinedIcon from "@mui/icons-material/InsertChartOutlined";
 import DeleteIcon from "@mui/icons-material/Delete";
 import HandymanIcon from "@mui/icons-material/Handyman";
+import { formatCurrency, sumCurrency } from "../utils/currency";
 
 function ExpensesCards() {
   const [expensesData, setExpensesData] = useState({});
@@ -133,11 +134,11 @@ function ExpensesCards() {
           trip_id: tripId,
           user_id: userId,
           payee: currentUserId,
-          total_money: totalMoney,
+          total_money: Number(formatCurrency(totalMoney)),
           expenses: expenses.map(({ category, desc, amount, _id, paid }) => ({
             category,
             desc,
-            amount,
+            amount: Number(formatCurrency(amount)),
             _id,
             paid,
           })),
@@ -204,10 +205,12 @@ function ExpensesCards() {
       ${filteredExpenses
         .map(
           (expense) =>
-            `${expense.category} | ₹${expense.amount} | ${expense.desc}`,
+            `${expense.category} | ₹${formatCurrency(expense.amount)} | ${expense.desc}`,
         )
         .join("\n")}
-      Total: ₹${userId === currentUserId ? totalAmount : totalAmountUnpaid}`;
+      Total: ₹${formatCurrency(
+        userId === currentUserId ? totalAmount : totalAmountUnpaid,
+      )}`;
 
     navigator.clipboard.writeText(tableData);
     setSuccessMessage("Table copied to clipboard!"); // Set success message
@@ -259,15 +262,13 @@ function ExpensesCards() {
       )}
       {sortedExpenses.length > 0 ? (
         sortedExpenses.map(({ userDetails: user, expenses, userId }) => {
-          const totalAmount = expenses.reduce(
-            (acc, expense) => acc + expense.amount,
-            0,
+          const totalAmount = sumCurrency(expenses.map((expense) => expense.amount));
+          const totalAmountUnpaid = sumCurrency(
+            expenses
+              .filter((expense) => !expense.paid)
+              .map((expense) => expense.amount),
           );
-          const totalAmountUnpaid = expenses.reduce(
-            (acc, expense) => (!expense.paid ? acc + expense.amount : 0),
-            0,
-          );
-          const totalAmountPaid = totalAmount - totalAmountUnpaid;
+          const totalAmountPaid = sumCurrency([totalAmount, -totalAmountUnpaid]);
 
           return (
             <Card
@@ -388,7 +389,7 @@ function ExpensesCards() {
                               wordBreak: "break-word",
                             }}
                           >
-                            ₹{expense.amount}{" "}
+                            ₹{formatCurrency(expense.amount)}{" "}
                             <Typography
                               variant="body2"
                               sx={{
@@ -406,15 +407,24 @@ function ExpensesCards() {
                           <TableCell align="left" sx={{ px: { xs: 0.5, sm: 2 }, width: { xs: 38, sm: 56 } }}>
                             <DeleteIcon
                               onClick={() => {
-                                if (!expense.paid) {
+                                // The expense creator's own share is marked paid immediately,
+                                // but they should still be able to remove it.
+                                if (!expense.paid || userId === currentUserId) {
                                   setSelectedExpense({ ...expense, userId });
                                   setOpenDeleteDialog(true);
                                 }
                               }}
                               sx={{
-                                cursor: expense.paid ? "default" : "pointer",
-                                opacity: expense.paid ? 0.2 : 1,
-                                pointerEvents: expense.paid ? "none" : "auto",
+                                cursor:
+                                  expense.paid && userId !== currentUserId
+                                    ? "default"
+                                    : "pointer",
+                                opacity:
+                                  expense.paid && userId !== currentUserId ? 0.2 : 1,
+                                pointerEvents:
+                                  expense.paid && userId !== currentUserId
+                                    ? "none"
+                                    : "auto",
                               }}
                             />
                           </TableCell>
@@ -450,7 +460,7 @@ function ExpensesCards() {
                         marginLeft: "8px",
                       }}
                     >
-                      ₹{totalAmountPaid}
+                      ₹{formatCurrency(totalAmountPaid)}
                     </Typography>
                   </Typography>
                   {userId !== currentUserId ? (
@@ -464,7 +474,7 @@ function ExpensesCards() {
                           marginLeft: "8px",
                         }}
                       >
-                        ₹{totalAmountUnpaid}
+                        ₹{formatCurrency(totalAmountUnpaid)}
                       </Typography>
                     </Typography>
                   ) : (

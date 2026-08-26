@@ -17,6 +17,7 @@ import {
   CircularProgress,
   Divider,
 } from "@mui/material";
+import { formatCurrency, sumCurrency } from "../utils/currency";
 
 function ExpensePopup({ tripId, userId, open, onClose }) {
   const [loading, setLoading] = useState(false);
@@ -50,11 +51,14 @@ function ExpensePopup({ tripId, userId, open, onClose }) {
 
   // Calculate totals
   const totalPerCategory = expenses?.reduce((acc, expense) => {
-    acc[expense.category] = (acc[expense.category] || 0) + expense.amount;
+    acc[expense.category] = sumCurrency([
+      acc[expense.category] || 0,
+      expense.amount,
+    ]);
     return acc;
   }, {});
 
-  const totalSpent = expenses?.reduce((acc, expense) => acc + expense.amount, 0);
+  const totalSpent = sumCurrency(expenses.map((expense) => expense.amount));
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
@@ -79,7 +83,7 @@ function ExpensePopup({ tripId, userId, open, onClose }) {
             <Box sx={{ mb: 3, textAlign: "center" }}>
               <Typography variant="h5" sx={{ fontWeight: "bold", mb: 1 , backgroundImage:
               "linear-gradient(160deg, #0a6a9b 0%, #44b5ad 100%)",color:'white',borderRadius:'20px'}}>
-                Total Spent: ₹{totalSpent || 0}
+                Total Spent: ₹{formatCurrency(totalSpent)}
               </Typography>
               <Divider />
             </Box>
@@ -106,7 +110,7 @@ function ExpensePopup({ tripId, userId, open, onClose }) {
                       ([category, total]) => (
                         <TableRow key={category}>
                           <TableCell>{category}</TableCell>
-                          <TableCell align="right">₹{total}</TableCell>
+                          <TableCell align="right">₹{formatCurrency(total)}</TableCell>
                         </TableRow>
                       )
                     )}
@@ -141,7 +145,7 @@ function ExpensePopup({ tripId, userId, open, onClose }) {
                   {expenses.map((expense) => (
                     <TableRow key={expense._id}>
                       <TableCell>{expense.category}</TableCell>
-                      <TableCell align="right">₹{expense.amount}</TableCell>
+                      <TableCell align="right">₹{formatCurrency(expense.amount)}</TableCell>
                       <TableCell>{expense.desc}</TableCell>
                       <TableCell>
                         {expense.paid ? (

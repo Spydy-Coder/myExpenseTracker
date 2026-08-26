@@ -1,13 +1,27 @@
 const Expense = require("../Models/Expense");
 const ExpenseRequest = require("../Models/ExpenseRequest");
 
+const roundCurrency = (value) => {
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) {
+    throw new Error("Invalid currency amount");
+  }
+
+  return Math.round((amount + Number.EPSILON) * 100) / 100;
+};
+
 const saveExpense = async (req, res) => {
   try {
     const { tripId, category, description, totalMoney, issuedBy, members } =
       req.body;
+    const normalizedTotalMoney = roundCurrency(totalMoney);
+    const normalizedMembers = members.map((member) => ({
+      ...member,
+      amount: roundCurrency(member.amount),
+    }));
 
     // Iterate over each member to create or update their document
-    const operations = members.map((member) => {
+    const operations = normalizedMembers.map((member) => {
       const expenseEntry = {
         category: category || "General", // Use 'General' as default category
         amount: member.amount, // Member's specific amount
@@ -38,6 +52,7 @@ const saveExpense = async (req, res) => {
     res.status(200).json({
       message: "Expenses saved successfully!",
       data: results,
+      totalMoney: normalizedTotalMoney,
     });
   } catch (error) {
     console.error("Error saving expenses:", error);
@@ -84,19 +99,19 @@ const removeExpense = async (req, res) => {
     // Remove expense from Expense collection
     const updateResult = await Expense.updateOne(
       { trip_id: tripId, user_id: userId },
-      { $pull: { expenses: { _id: expenseId, paid: false } } }
+      { $pull: { expenses: { _id: expenseId } } }
     );
 
     if (updateResult.modifiedCount === 0) {
       return res
         .status(400)
-        .json({ message: "Expense not found or already paid" });
+        .json({ message: "Expense not found" });
     }
 
     // Remove expense from ExpenseRequest collection
     const result = await ExpenseRequest.findOneAndUpdate(
        { trip_id: tripId, user_id: userId },
-      { $pull: { expenses: { _id: expenseId, paid: false } } },
+      { $pull: { expenses: { _id: expenseId } } },
       { new: true }
     );
 
@@ -186,6 +201,12 @@ const saveExpenseRequest = async (req, res) => {
       return res.status(400).json({ message: "Invalid request data" });
     }
 
+    const normalizedTotalMoney = roundCurrency(total_money);
+    const normalizedExpenses = expenses.map((expense) => ({
+      ...expense,
+      amount: roundCurrency(expense.amount),
+    }));
+
     // Perform a single upsert operation for the user's expenses
     const resultUser = await ExpenseRequest.findOneAndUpdate(
       {
@@ -195,8 +216,8 @@ const saveExpenseRequest = async (req, res) => {
       },
       {
         $set: {
-          expenses: expenses, // Set expenses only if the document is inserted
-          total_money, // Set total money only if the document is inserted
+          expenses: normalizedExpenses, // Set expenses only if the document is inserted
+          total_money: normalizedTotalMoney, // Set total money only if the document is inserted
         },
       },
       {
@@ -217,12 +238,17 @@ const saveExpenseRequest = async (req, res) => {
     const totalMoneyPayee = resultPayee ? resultPayee.total_money : 0;
 
     // Calculate the difference between total_money for user and payee
-    const moneyLeft = -resultUser.total_money + totalMoneyPayee;
+    const moneyLeft = roundCurrency(-resultUser.total_money + totalMoneyPayee);
 
     // Update the "money_left" field in the user's document
     await ExpenseRequest.findOneAndUpdate(
       { user_id: user_id, trip_id: trip_id, payee: payee },
-      { $set: { money_left: moneyLeft, moneyToBeReceive: totalMoneyPayee } }
+      {
+        $set: {
+          money_left: moneyLeft,
+          moneyToBeReceive: roundCurrency(totalMoneyPayee),
+        },
+      }
     );
 
     // Optionally, update the payee document too if needed, use -moneyLeft
@@ -231,8 +257,8 @@ const saveExpenseRequest = async (req, res) => {
         { user_id: payee, trip_id: trip_id, payee: user_id },
         {
           $set: {
-            money_left: -moneyLeft,
-            moneyToBeReceive: resultUser.total_money,
+            money_left: roundCurrency(-moneyLeft),
+            moneyToBeReceive: roundCurrency(resultUser.total_money),
           },
         }
       );
