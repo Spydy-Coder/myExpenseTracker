@@ -59,11 +59,10 @@ function ExpenseRequest() {
     }
   }, [apiUrl, userId]);
 
-  const paymentUpiLink = (upiId, amount, description) => {
+  const paymentUpiLink = (upiId, amount) => {
     const params = new URLSearchParams({
       pa: upiId.trim(),
       am: Number(amount).toFixed(2),
-      tn: description,
     });
 
     return `upi://pay?${params.toString()}`;
@@ -355,10 +354,6 @@ function ExpenseRequest() {
                       upiLink={paymentUpiLink(
                         request.payee.upiId,
                         Number(formatCurrency(Math.abs(request.money_left))),
-                        request.expenses
-                          .map((expense) => expense.desc)
-                          .filter(Boolean)
-                          .join(", ") || "Expense settlement",
                       )}
                     />
                   ) : (
