@@ -349,15 +349,21 @@ function ExpenseRequest() {
                   Mark as Paid
                 </Button>
                 {request.money_left < 0 &&
-                  (request.payee.upiId ? (
+                  (request.payee.upiId || request.payee.upiPhoneNumber ? (
                     <QrCodeHolder
-                      upiLink={paymentUpiLink(
-                        request.payee.upiId,
-                        Number(formatCurrency(Math.abs(request.money_left))),
-                      )}
+                      upiLink={
+                        request.payee.upiId
+                          ? paymentUpiLink(
+                              request.payee.upiId,
+                              Number(formatCurrency(Math.abs(request.money_left))),
+                            )
+                          : ""
+                      }
+                      upiPhoneNumber={request.payee.upiPhoneNumber}
+                      amount={formatCurrency(Math.abs(request.money_left))}
                     />
                   ) : (
-                    <Tooltip title="The payee has not added a valid UPI ID for QR payments yet.">
+                    <Tooltip title="The payee has not added a UPI ID or UPI Mobile Number yet.">
                       <span>
                         <Button variant="outlined" disabled>
                           Pay now

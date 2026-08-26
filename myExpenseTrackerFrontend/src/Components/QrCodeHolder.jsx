@@ -7,6 +7,7 @@ import DialogContent from "@mui/material/DialogContent";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { QRCode } from "react-qr-code";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
@@ -30,8 +31,10 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   },
 }));
 
-export default function QrCodeHolder({ upiLink }) {
+export default function QrCodeHolder({ upiLink, upiPhoneNumber, amount }) {
   const [open, setOpen] = React.useState(false);
+  const [payOpen, setPayOpen] = React.useState(false);
+  const [copied, setCopied] = React.useState(false);
   const qrCodeRef = React.useRef(null);
   const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const isSmallViewport = useMediaQuery("(max-width:600px)");
@@ -46,7 +49,18 @@ export default function QrCodeHolder({ upiLink }) {
   };
 
   const handlePayNow = () => {
-    window.location.href = upiLink;
+    setPayOpen(true);
+  };
+
+  const handleCopyPhoneNumber = async () => {
+    if (!upiPhoneNumber) return;
+
+    await navigator.clipboard.writeText(upiPhoneNumber);
+    setCopied(true);
+  };
+
+  const handleOpenUpiApp = () => {
+    window.location.href = "upi://pay";
   };
 
   const handleDownload = () => {
@@ -70,18 +84,20 @@ export default function QrCodeHolder({ upiLink }) {
       <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 1 }}>
         {shouldOpenUpiApp ? (
           <>
-            <Button variant="outlined" onClick={handleClickOpen}>
-              Show QR
-            </Button>
+            {upiLink && (
+              <Button variant="outlined" onClick={handleClickOpen}>
+                Show QR
+              </Button>
+            )}
             <Button variant="contained" onClick={handlePayNow}>
               Pay now
             </Button>
           </>
-        ) : (
+        ) : upiLink ? (
           <Button variant="outlined" onClick={handleClickOpen}>
             Download QR
           </Button>
-        )}
+        ) : null}
       </Box>
       <BootstrapDialog
         onClose={handleClose}
@@ -152,10 +168,51 @@ export default function QrCodeHolder({ upiLink }) {
           </Box>
         </DialogContent>
       </BootstrapDialog>
+      <Dialog onClose={() => setPayOpen(false)} open={payOpen} fullWidth maxWidth="xs">
+        <DialogContent dividers>
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            Pay from your UPI app
+          </Typography>
+          <Typography sx={{ mb: 2 }}>
+            Amount to pay: <strong>₹{amount}</strong>
+          </Typography>
+          {upiPhoneNumber ? (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+              <Typography sx={{ overflowWrap: "anywhere", flexGrow: 1 }}>
+                UPI Mobile Number: <strong>{upiPhoneNumber}</strong>
+              </Typography>
+              <IconButton aria-label="copy UPI mobile number" onClick={handleCopyPhoneNumber}>
+                <ContentCopyIcon fontSize="small" />
+              </IconButton>
+            </Box>
+          ) : (
+            <Typography color="text.secondary" sx={{ mb: 2 }}>
+              The payee has not added a UPI Mobile Number.
+            </Typography>
+          )}
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            {upiPhoneNumber
+              ? "Copy the mobile number, open your preferred UPI app, paste it as the recipient, and enter the amount shown above."
+              : "Open your preferred UPI app and pay the amount shown above using the recipient details."}
+          </Typography>
+          <Box sx={{ display: "flex", gap: 1 }}>
+            {upiPhoneNumber && (
+              <Button variant="outlined" onClick={handleCopyPhoneNumber}>
+                {copied ? "Copied" : "Copy mobile number"}
+              </Button>
+            )}
+            <Button variant="contained" onClick={handleOpenUpiApp}>
+              Open UPI app
+            </Button>
+          </Box>
+        </DialogContent>
+      </Dialog>
     </React.Fragment>
   );
 }
 
 QrCodeHolder.propTypes = {
-  upiLink: PropTypes.string.isRequired,
+  upiLink: PropTypes.string,
+  upiPhoneNumber: PropTypes.string,
+  amount: PropTypes.string.isRequired,
 };
