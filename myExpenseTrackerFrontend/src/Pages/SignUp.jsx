@@ -1,14 +1,13 @@
-import * as React from "react";
-import { AppProvider } from "@toolpad/core/AppProvider";
-import { useTheme } from "@mui/material/styles";
-import { Box, TextField, Button, Typography, Card, Link } from "@mui/material"; // Import Link component
+import { useState } from "react";
+import { Box, TextField, Button, Typography, Card, Link, Avatar, Alert } from "@mui/material";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { useAuth } from "../Auth/AuthProvider";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link as RouterLink } from "react-router-dom";
 
 const SignUp = () => {
-  const [message, setMessage] = React.useState(""); // State to hold success or error message
+  const [message, setMessage] = useState(""); // State to hold success or error message
   const { login } = useAuth();
-  const [formData, setFormData] = React.useState({
+  const [formData, setFormData] = useState({
     username: "",
     email: "",
     password: "",
@@ -53,93 +52,97 @@ const SignUp = () => {
         }
       }
     } catch (error) {
+      console.error(error);
       setMessage("Something went wrong. Please try again."); // Show generic error message
     }
   };
 
-  const theme = useTheme();
-
   return (
-    <AppProvider theme={theme}>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        px: 2,
+        py: 6,
+        background: "linear-gradient(180deg, #f5f9ff 0%, #eef7ff 100%)",
+      }}
+    >
       <Card
         sx={{
-          maxWidth: 400,
-          margin: "auto",
-          mt: 8,
-          p: 4,
-          boxShadow: 3,
-          borderRadius: 2,
+          width: "100%",
+          maxWidth: 500,
+          borderRadius: 4,
+          boxShadow: "0 24px 60px rgba(15, 23, 42, 0.12)",
+          overflow: "hidden",
         }}
       >
-        <Box
-          component="form"
-          onSubmit={handleSubmit}
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 2,
-          }}
-        >
-          <Typography variant="h4" component="h1" gutterBottom>
-            Sign Up
+        <Box sx={{ p: { xs: 4, md: 5 }, textAlign: "center" }}>
+          <Avatar
+            sx={{
+              bgcolor: "rgba(68, 181, 173, 0.16)",
+              color: "#0a6a9b",
+              width: 64,
+              height: 64,
+              mx: "auto",
+              mb: 2,
+            }}
+          >
+            <LockOutlinedIcon sx={{ fontSize: 32 }} />
+          </Avatar>
+          <Typography variant="h4" component="h1" sx={{ fontWeight: 800, mb: 1 }}>
+            Create your account
           </Typography>
-          <TextField
-            name="email"
-            label="Email"
-            type="email"
-            fullWidth
-            value={formData.email}
-            onChange={handleInputChange}
-            required
-          />
-          <TextField
-            name="username"
-            label="Username"
-            type="text"
-            fullWidth
-            value={formData.username}
-            onChange={handleInputChange}
-            required
-          />
-          <TextField
-            name="password"
-            label="Password"
-            type="password"
-            fullWidth
-            value={formData.password}
-            onChange={handleInputChange}
-            required
-          />
-          <Button type="submit" variant="contained" color="primary" fullWidth>
-            Sign Up
-          </Button>
-
-          {/* Display success or error message */}
+          <Typography sx={{ color: "#52667a", mb: 3 }}>
+            Join myExpense to make trip budgeting easy and transparent for every group.
+          </Typography>
+          <Box component="form" onSubmit={handleSubmit} sx={{ display: "grid", gap: 2 }}>
+            <TextField
+              name="username"
+              label="Username"
+              type="text"
+              fullWidth
+              value={formData.username}
+              onChange={handleInputChange}
+              required
+            />
+            <TextField
+              name="email"
+              label="Email"
+              type="email"
+              fullWidth
+              value={formData.email}
+              onChange={handleInputChange}
+              required
+            />
+            <TextField
+              name="password"
+              label="Password"
+              type="password"
+              fullWidth
+              value={formData.password}
+              onChange={handleInputChange}
+              required
+            />
+            <Button type="submit" variant="contained" size="large" fullWidth sx={{ py: 1.3 }}>
+              Sign Up
+            </Button>
+          </Box>
           {message && (
-            <Typography
-              variant="body2"
-              sx={{
-                mt: 2,
-                color:
-                  message.includes("Error") || message.includes("already")
-                    ? "red"
-                    : "green",
-              }}
-            >
+            <Alert severity={message.includes("Error") || message.includes("already") ? "error" : "success"} sx={{ mt: 3 }}>
               {message}
-            </Typography>
+            </Alert>
           )}
-
-          <Typography variant="body2" sx={{ mt: 2 }}>
-            Already have an account?{" "}
-            <Link href="/login" underline="hover">
-              Go to login
+          <Typography variant="body2" sx={{ mt: 3, color: "#52667a" }}>
+            Already have an account?{' '}
+            <Link component={RouterLink} to="/login" underline="hover" sx={{ fontWeight: 700 }}>
+              Log in
             </Link>
           </Typography>
         </Box>
       </Card>
-    </AppProvider>
+    </Box>
   );
 };
 

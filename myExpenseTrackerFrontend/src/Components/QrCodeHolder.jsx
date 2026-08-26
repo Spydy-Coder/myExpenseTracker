@@ -5,6 +5,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
+import DownloadIcon from "@mui/icons-material/Download";
 import { QRCode } from "react-qr-code";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
@@ -30,6 +31,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 
 export default function QrCodeHolder({ upiLink }) {
   const [open, setOpen] = React.useState(false);
+  const qrCodeRef = React.useRef(null);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -39,10 +41,26 @@ export default function QrCodeHolder({ upiLink }) {
     setOpen(false);
   };
 
+  const handleDownload = () => {
+    const svg = qrCodeRef.current?.querySelector("svg");
+    if (!svg) return;
+
+    const svgMarkup = new XMLSerializer().serializeToString(svg);
+    const svgBlob = new Blob([svgMarkup], { type: "image/svg+xml;charset=utf-8" });
+    const downloadUrl = URL.createObjectURL(svgBlob);
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = "expense-payment-qr.svg";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(downloadUrl);
+  };
+
   return (
     <React.Fragment>
-      <Button variant="outlined" onClick={handleClickOpen} sx={{ mr: 2 }}>
-        Pay Now
+      <Button variant="outlined" onClick={handleClickOpen}>
+        Show payment QR
       </Button>
       <BootstrapDialog
         onClose={handleClose}
@@ -62,10 +80,20 @@ export default function QrCodeHolder({ upiLink }) {
           <CloseIcon />
         </IconButton>
         <DialogContent dividers>
-          <QRCode value={upiLink} size={200} style={{ margin: "0 auto" }} />
+          <Box ref={qrCodeRef} sx={{ display: "inline-flex", p: 1, bgcolor: "#fff", borderRadius: 1 }}>
+            <QRCode value={upiLink} size={200} />
+          </Box>
           <Typography variant="body1" sx={{ mt: 2, mb: 2 }}>
-            Scan the QR code using any UPI app:
+            Scan this QR code with any UPI app to pay the displayed amount.
           </Typography>
+          <Button
+            variant="contained"
+            startIcon={<DownloadIcon />}
+            onClick={handleDownload}
+            sx={{ mb: 2 }}
+          >
+            Download QR
+          </Button>
           <Box
             sx={{
               display: "flex",
