@@ -31,7 +31,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   },
 }));
 
-export default function QrCodeHolder({ upiLink, upiPhoneNumber, amount }) {
+export default function QrCodeHolder({ upiLink, upiId, upiPhoneNumber, amount }) {
   const [open, setOpen] = React.useState(false);
   const [payOpen, setPayOpen] = React.useState(false);
   const [copied, setCopied] = React.useState(false);
@@ -53,11 +53,17 @@ export default function QrCodeHolder({ upiLink, upiPhoneNumber, amount }) {
     setPayOpen(true);
   };
 
+  const handleCopyUpiId = async () => {
+    if (!upiId) return;
+
+    await navigator.clipboard.writeText(upiId);
+    setCopied(true);
+  };
+
   const handleCopyPhoneNumber = async () => {
     if (!upiPhoneNumber) return;
 
     await navigator.clipboard.writeText(upiPhoneNumber);
-    setCopied(true);
   };
 
   const handleCopyAmount = async () => {
@@ -178,7 +184,7 @@ export default function QrCodeHolder({ upiLink, upiPhoneNumber, amount }) {
           <Typography sx={{ mb: 2 }}>
             Amount to pay: <strong>₹{amount}</strong>
           </Typography>
-          {upiPhoneNumber ? (
+          {upiPhoneNumber && (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
               <Typography sx={{ overflowWrap: "anywhere", flexGrow: 1 }}>
                 UPI Mobile Number: <strong>{upiPhoneNumber}</strong>
@@ -187,20 +193,26 @@ export default function QrCodeHolder({ upiLink, upiPhoneNumber, amount }) {
                 <ContentCopyIcon fontSize="small" />
               </IconButton>
             </Box>
-          ) : (
-            <Typography color="text.secondary" sx={{ mb: 2 }}>
-              The payee has not added a UPI Mobile Number.
-            </Typography>
           )}
+          {upiId ? (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+              <Typography sx={{ overflowWrap: "anywhere", flexGrow: 1 }}>
+                UPI ID: <strong>{upiId}</strong>
+              </Typography>
+              <IconButton aria-label="copy UPI ID" onClick={handleCopyUpiId}>
+                <ContentCopyIcon fontSize="small" />
+              </IconButton>
+            </Box>
+          ) : null}
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            {upiPhoneNumber
-              ? "Copy the mobile number, open your preferred UPI app, paste it as the recipient, and enter the amount shown above."
+            {upiId
+              ? "Copy the UPI ID, open your preferred UPI app, paste it as the recipient, and enter the amount shown above."
               : "Open your preferred UPI app and pay the amount shown above using the recipient details."}
           </Typography>
           <Box sx={{ display: "flex", gap: 1 }}>
-            {upiPhoneNumber && (
-              <Button variant="outlined" onClick={handleCopyPhoneNumber}>
-                {copied ? "Copied" : "Copy mobile number"}
+            {upiId && (
+              <Button variant="outlined" onClick={handleCopyUpiId}>
+                {copied ? "Copied" : "Copy UPI ID"}
               </Button>
             )}
             <Button variant="contained" onClick={handleCopyAmount}>
@@ -215,6 +227,7 @@ export default function QrCodeHolder({ upiLink, upiPhoneNumber, amount }) {
 
 QrCodeHolder.propTypes = {
   upiLink: PropTypes.string,
+  upiId: PropTypes.string,
   upiPhoneNumber: PropTypes.string,
   amount: PropTypes.string.isRequired,
 };

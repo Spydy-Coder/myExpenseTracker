@@ -218,34 +218,33 @@ function ExpenseRequest() {
               >
                 <strong>Payee:</strong> {request.payee.username}
               </Typography>
-              <Box
-                sx={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 1,
-                  mt: 1,
-                }}
-              >
-                <Typography
-                  variant="subtitle1"
+              {request.payee.upiId && (
+                <Box
                   sx={{
-                    color: grey[700],
-                    overflowWrap: "anywhere",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 1,
+                    mt: 1,
                   }}
                 >
-                  <strong>UPI Mobile Number:</strong>{" "}
-                  {request.payee.upiPhoneNumber === ""
-                    ? "Not Available"
-                    : request.payee.upiPhoneNumber}
-                </Typography>
-                <Tooltip title={tooltipText}>
-                  <IconButton onClick={() => handleCopy(request.payee.upiPhoneNumber)}>
-                    <ContentCopyIcon sx={{ fontSize: 18 }} />
-                  </IconButton>
-                </Tooltip>
-              </Box>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      color: grey[700],
+                      overflowWrap: "anywhere",
+                    }}
+                  >
+                    <strong>UPI ID:</strong> {request.payee.upiId}
+                  </Typography>
+                  <Tooltip title={tooltipText}>
+                    <IconButton onClick={() => handleCopy(request.payee.upiId)}>
+                      <ContentCopyIcon sx={{ fontSize: 18 }} />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+              )}
             </Box>
 
             <Divider sx={{ mb: 2 }} />
@@ -348,29 +347,17 @@ function ExpenseRequest() {
                 >
                   Mark as Paid
                 </Button>
-                {request.money_left < 0 &&
-                  (request.payee.upiId || request.payee.upiPhoneNumber ? (
-                    <QrCodeHolder
-                      upiLink={
-                        request.payee.upiId
-                          ? paymentUpiLink(
-                              request.payee.upiId,
-                              Number(formatCurrency(Math.abs(request.money_left))),
-                            )
-                          : ""
-                      }
-                      upiPhoneNumber={request.payee.upiPhoneNumber}
-                      amount={formatCurrency(Math.abs(request.money_left))}
-                    />
-                  ) : (
-                    <Tooltip title="The payee has not added a UPI ID or UPI Mobile Number yet.">
-                      <span>
-                        <Button variant="outlined" disabled>
-                          Pay now
-                        </Button>
-                      </span>
-                    </Tooltip>
-                  ))}
+                {request.money_left < 0 && request.payee.upiId && (
+                  <QrCodeHolder
+                    upiLink={paymentUpiLink(
+                      request.payee.upiId,
+                      Number(formatCurrency(Math.abs(request.money_left))),
+                    )}
+                    upiId={request.payee.upiId}
+                    upiPhoneNumber={request.payee.upiPhoneNumber}
+                    amount={formatCurrency(Math.abs(request.money_left))}
+                  />
+                )}
               </Box>
 
               <Typography
