@@ -78,7 +78,7 @@ exports.fetchUpiId = async (req, res) => {
   }
 };
 
-// Update the UPI phone number for a user
+// Update the UPI mobile number for a user
 exports.updateUpiId = async (req, res) => {
   try {
     const upiId = String(req.body.upiId || "").trim().toLowerCase();
@@ -93,7 +93,7 @@ exports.updateUpiId = async (req, res) => {
     }
 
     if (upiPhoneNumber && !/^\d{10}$/.test(upiPhoneNumber)) {
-      return res.status(400).json({ message: "Enter a valid 10-digit UPI phone number" });
+      return res.status(400).json({ message: "Enter a valid 10-digit UPI mobile number" });
     }
 
     const user = await User.findByIdAndUpdate(

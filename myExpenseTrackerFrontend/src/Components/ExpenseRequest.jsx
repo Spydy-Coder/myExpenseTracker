@@ -236,7 +236,7 @@ function ExpenseRequest() {
                     overflowWrap: "anywhere",
                   }}
                 >
-                  <strong>UPI Phone Number:</strong>{" "}
+                  <strong>UPI Mobile Number:</strong>{" "}
                   {request.payee.upiPhoneNumber === ""
                     ? "Not Available"
                     : request.payee.upiPhoneNumber}
@@ -382,7 +382,7 @@ function ExpenseRequest() {
                   fontStyle: "italic",
                 }}
               >
-                * Click this button after you&apos;ve paid or received the amount.
+                * Click Mark as Paid after you&apos;ve paid or received the amount.
               </Typography>
             </Box>
           </CardContent>

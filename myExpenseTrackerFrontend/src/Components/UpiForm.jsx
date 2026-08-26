@@ -9,7 +9,7 @@ const UpiForm = ({ open, onClose }) => {
   const apiUrl = import.meta.env.VITE_API_URL 
 
   useEffect(() => {
-    // Fetch the existing UPI phone number from the backend (if any)
+    // Fetch the existing UPI mobile number from the backend (if any)
     const fetchUpiId = async () => {
       try {
         const userId = localStorage.getItem("userId");
@@ -85,7 +85,7 @@ const UpiForm = ({ open, onClose }) => {
         />
         <TextField
           fullWidth
-          label="UPI Phone Number (optional)"
+          label="UPI Mobile Number (optional)"
           value={upiPhoneNumber}
           onChange={(e) => setUpiPhoneNumber(e.target.value)}
           error={Boolean(error)}
