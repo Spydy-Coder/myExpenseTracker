@@ -69,12 +69,12 @@ function ExpensePopup({ tripId, userId, open, onClose }) {
       open={open}
       onClose={onClose}
       fullWidth
-      maxWidth="lg"
+      maxWidth="md"
       scroll="paper"
       PaperProps={{
         sx: {
-          width: "calc(100% - 32px)",
-          maxHeight: { xs: "94vh", sm: "88vh" },
+          width: "calc(100% - 48px)",
+          maxHeight: { xs: "92vh", sm: "84vh" },
           borderRadius: { xs: 2, sm: 4 },
           overflow: "hidden",
         },
