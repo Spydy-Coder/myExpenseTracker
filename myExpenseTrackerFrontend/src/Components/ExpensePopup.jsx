@@ -69,14 +69,12 @@ function ExpensePopup({ tripId, userId, open, onClose }) {
       open={open}
       onClose={onClose}
       fullWidth
-      maxWidth="xl"
+      maxWidth="lg"
       scroll="paper"
       PaperProps={{
         sx: {
-          width: { xs: "calc(100% - 16px)", sm: "calc(100% - 32px)", md: "calc(100% - 48px)" },
-          maxWidth: "1400px",
-          minHeight: { xs: "92vh", sm: "88vh" },
-          maxHeight: { xs: "96vh", sm: "92vh" },
+          width: "calc(100% - 32px)",
+          maxHeight: { xs: "94vh", sm: "88vh" },
           borderRadius: { xs: 2, sm: 4 },
           overflow: "hidden",
         },
@@ -93,7 +91,7 @@ function ExpensePopup({ tripId, userId, open, onClose }) {
           </Box>
         </Box>
       </DialogTitle>
-      <DialogContent sx={{ p: { xs: 2, sm: 3.5, md: 4 }, background: "#f8fbff" }}>
+      <DialogContent sx={{ p: { xs: 2, sm: 3.5 }, background: "#f8fbff" }}>
         {loading ? (
           <Box sx={{ textAlign: "center", my: 6 }}>
             <CircularProgress size={44} />
@@ -112,7 +110,7 @@ function ExpensePopup({ tripId, userId, open, onClose }) {
         ) : (
           <>
             {/* Total Spent */}
-            <Box sx={{ mt: 0.5, mb: 3, px: { xs: 2, sm: 3, md: 4 }, py: { xs: 2.5, sm: 3 }, textAlign: "center", borderRadius: 3, background: "linear-gradient(135deg, #0b5f93, #35a99d)", boxShadow: "0 10px 22px rgba(15, 113, 143, 0.2)" }}>
+            <Box sx={{ mt: 0.5, mb: 3, px: { xs: 2, sm: 3 }, py: 2.5, textAlign: "center", borderRadius: 3, background: "linear-gradient(135deg, #0b5f93, #35a99d)", boxShadow: "0 10px 22px rgba(15, 113, 143, 0.2)" }}>
               <Typography variant="caption" sx={{ display: "block", color: "rgba(255,255,255,0.8)", fontWeight: 800, letterSpacing: 1, lineHeight: 1.3 }}>TOTAL TRIP SPENT</Typography>
               <Typography variant="h4" sx={{ display: "block", fontWeight: 900, mt: 1, color: "white", fontSize: { xs: "1.55rem", sm: "2.125rem" }, lineHeight: 1.15 }}>
                 ₹{formatCurrency(totalSpent)}
