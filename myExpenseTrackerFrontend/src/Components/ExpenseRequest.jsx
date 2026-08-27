@@ -13,6 +13,8 @@ import {
 } from "@mui/material";
 import { grey, red, green, blue } from "@mui/material/colors";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
+import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
 import QrCodeHolder from "./QrCodeHolder";
 import { formatCurrency } from "../utils/currency";
 
@@ -142,9 +144,34 @@ function ExpenseRequest() {
         width: "100%",
         minWidth: 0,
         p: { xs: 1, sm: 3 },
-        backgroundColor: "#f5f5f5", // Light background for the page
+        background: "radial-gradient(circle at top, #e9f4ff 0%, #f7faff 42%, #ffffff 100%)",
       }}
     >
+      <Box sx={{ width: "100%", textAlign: "center", mb: { xs: 0, sm: 1 } }}>
+        <Typography
+          variant="h4"
+          component="h1"
+          gutterBottom
+          sx={{
+            color: "primary.main",
+            textAlign: "center",
+            fontWeight: "bold",
+            marginTop: 2,
+          }}
+        >
+          Payment requests
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+          Review balances, settle up, and keep every trip on track.
+        </Typography>
+      </Box>
+      {expenseRequests.length === 0 && (
+        <Box sx={{ mt: 4, py: 5, px: 3, width: "100%", maxWidth: 440, textAlign: "center", bgcolor: "rgba(255,255,255,0.8)", border: "1px dashed #a9c8e5", borderRadius: 4 }}>
+          <AccountBalanceWalletOutlinedIcon color="primary" sx={{ fontSize: 42, mb: 1 }} />
+          <Typography variant="h6" sx={{ fontWeight: 700 }}>No payment requests</Typography>
+          <Typography variant="body2" color="text.secondary">You&apos;re all caught up for now.</Typography>
+        </Box>
+      )}
       {expenseRequests.map((request) => (
         <Card
           key={request.trip_id}
@@ -152,16 +179,17 @@ function ExpenseRequest() {
             width: { xs: "100%", sm: 350 },
             minWidth: 0,
             maxWidth: "100%",
-            minHeight: 550,
+            minHeight: 530,
             height: "auto",
-            boxShadow: 3,
-            borderRadius: "16px",
+            boxShadow: "0 10px 28px rgba(36, 78, 120, 0.12)",
+            borderRadius: "20px",
+            border: "1px solid rgba(255,255,255,0.85)",
             overflow: "hidden",
             background: "linear-gradient(135deg, #ffffff, #f0f4ff)",
             transition: "transform 0.2s ease-in-out, box-shadow 0.2s",
             "&:hover": {
-              transform: "scale(1.03)",
-              boxShadow: 6,
+              transform: "translateY(-5px)",
+              boxShadow: "0 18px 38px rgba(36, 78, 120, 0.2)",
             },
           }}
         >
@@ -175,48 +203,29 @@ function ExpenseRequest() {
               p: { xs: 2, sm: 3 },
             }}
           >
-            {/* Payment Status */}
-            <Chip
-              label={
-                request.expenses.every((expense) => expense.paid)
-                  ? "Fully Paid"
-                  : "Not Fully Paid"
-              }
-              sx={{
-                alignSelf: "center",
-                backgroundColor: request.expenses.every(
-                  (expense) => expense.paid
-                )
-                  ? green[100]
-                  : red[100],
-                color: request.expenses.every((expense) => expense.paid)
-                  ? green[800]
-                  : red[800],
-                fontWeight: "bold",
-                mb: 2,
-              }}
-            />
-
             {/* Trip ID and Payee */}
-            <Box sx={{ textAlign: "center", mb: 2 }}>
+            <Box sx={{ p: 2, mb: 2, borderRadius: 3, background: "linear-gradient(135deg, #e9f5ff, #f1edff)" }}>
+              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 1, mb: 1.5 }}>
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography variant="caption" sx={{ color: "#52708f", letterSpacing: 0.8, fontWeight: 800 }}>TRIP BALANCE</Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 800, color: blue[900], overflowWrap: "anywhere", lineHeight: 1.25 }}>
+                    {request.trip_id}
+                  </Typography>
+                </Box>
+                <Chip
+                  size="small"
+                  label={request.expenses.every((expense) => expense.paid) ? "Settled" : "Pending"}
+                  sx={{ bgcolor: request.expenses.every((expense) => expense.paid) ? green[100] : red[100], color: request.expenses.every((expense) => expense.paid) ? green[800] : red[800], fontWeight: 800 }}
+                />
+              </Box>
               <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: "bold",
-                  color: blue[800],
-                  overflowWrap: "anywhere",
-                }}
-              >
-                Trip ID: {request.trip_id}
-              </Typography>
-              <Typography
-                variant="subtitle1"
+                variant="body2"
                 sx={{
                   color: grey[700],
                   overflowWrap: "anywhere",
                 }}
               >
-                <strong>Payee:</strong> {request.payee.username}
+                Payee <strong>{request.payee.username}</strong>
               </Typography>
               {request.payee.upiId && (
                 <Box
@@ -230,7 +239,7 @@ function ExpenseRequest() {
                   }}
                 >
                   <Typography
-                    variant="subtitle1"
+                    variant="body2"
                     sx={{
                       color: grey[700],
                       overflowWrap: "anywhere",
@@ -251,10 +260,10 @@ function ExpenseRequest() {
 
             {/* Expense Details */}
             <Box sx={{ mb: 2 }}>
-              <Typography variant="subtitle1" sx={{ mb: 1 }}>
+              <Typography variant="subtitle1" sx={{ mb: 1, p: 1.25, borderRadius: 2, bgcolor: "#fff4f4", color: red[800] }}>
                 <strong>To be Sent:</strong> ₹{formatCurrency(request.total_money)}
               </Typography>
-              <Typography variant="subtitle1" sx={{ mb: 1 }}>
+              <Typography variant="subtitle1" sx={{ mb: 1, p: 1.25, borderRadius: 2, bgcolor: "#f0faf4", color: green[800] }}>
                 <strong>To be Received:</strong> ₹{formatCurrency(request.moneyToBeReceive)}
               </Typography>
               <Divider sx={{ mb: 2 }} />
@@ -262,9 +271,12 @@ function ExpenseRequest() {
                 variant="subtitle1"
                 sx={{
                   textAlign: "center",
-                  fontWeight: "bold",
-                  color: grey[800],
-                  mb: 2,
+                  fontWeight: 900,
+                  color: request.money_left > 0 ? green[800] : "#bd5b12",
+                  mb: 0,
+                  p: 1.5,
+                  borderRadius: 2.5,
+                  bgcolor: request.money_left > 0 ? "#effaf4" : "#fff5ed",
                 }}
               >
                 {request.money_left > 0
@@ -278,7 +290,7 @@ function ExpenseRequest() {
             <Box
               ref={boxRef}
               sx={{
-                maxHeight: "150px",
+                maxHeight: "132px",
                 overflowY: "auto",
                 mb: 2,
                 pr: 1,
@@ -295,13 +307,21 @@ function ExpenseRequest() {
                 },
               }}
             >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 0.75 }}>
+                <ReceiptLongOutlinedIcon fontSize="small" color="primary" />
+                <Typography variant="caption" sx={{ fontWeight: 800, color: "#416887", letterSpacing: 0.6 }}>EXPENSE BREAKDOWN</Typography>
+              </Box>
               {request.expenses.map((expense, index) => (
                 <Typography
                   key={index}
                   variant="body2"
                   sx={{
                     color: grey[600],
-                    mb: 0.5,
+                    mb: 0.75,
+                    px: 1,
+                    py: 0.75,
+                    borderRadius: 1.5,
+                    backgroundColor: expense.paid ? "#f2fbf5" : "#fff8f8",
                     display: "flex",
                     flexWrap: "wrap",
                     gap: 0.5,
@@ -337,6 +357,7 @@ function ExpenseRequest() {
                 <Button
                   variant="contained"
                   color="success"
+                  sx={{ borderRadius: 2, px: 2, fontWeight: 700, boxShadow: "none" }}
                   onClick={() =>
                     handleMarkAsPaid(
                       request.trip_id,
