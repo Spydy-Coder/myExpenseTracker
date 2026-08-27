@@ -1,7 +1,6 @@
-import React from "react";
+import PropTypes from "prop-types";
 import { Box, Typography } from "@mui/material";
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import TripCard from "./TripCard";
 import { grey } from "@mui/material/colors";
 import { useNavigate } from "react-router-dom";
@@ -39,7 +38,7 @@ const TripDetails = ({ refreshKey }) => {
   };
 
   return (
-    <Box sx={{ py: 4, textAlign: "center" }}>
+    <Box sx={{ py: { xs: 3, sm: 5 }, px: { xs: 1.5, sm: 3 }, textAlign: "center", minHeight: "100%" }}>
       <Typography
         variant="h4" // Defines the size and style of the heading
         component="h1" // Semantic HTML element
@@ -48,7 +47,7 @@ const TripDetails = ({ refreshKey }) => {
           color: "primary.main", // Use theme's primary color
           textAlign: "center", // Center-align the text
           fontWeight: "bold", // Make the text bold
-          marginTop: 2, // Add margin to the top
+          marginTop: 1,
         }}
       >
         Your Trips
@@ -63,10 +62,13 @@ const TripDetails = ({ refreshKey }) => {
           fontStyle: "italic",
         }}
       >
-        * Refresh if New Trips are not visible.
+        Your shared trips, all in one place.
       </Typography>
       {trips.length === 0 ? (
-        <Typography>No trips found. Create one to get started!</Typography>
+        <Box sx={{ mt: 5, py: 5, px: 3, mx: "auto", maxWidth: 440, borderRadius: 4, bgcolor: "rgba(255,255,255,0.8)", border: "1px dashed", borderColor: "primary.light" }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>No trips yet</Typography>
+          <Typography color="text.secondary">Create or join a trip to start tracking expenses together.</Typography>
+        </Box>
       ) : (
         <Box
           sx={{
@@ -74,17 +76,20 @@ const TripDetails = ({ refreshKey }) => {
             flexWrap: "wrap",
             justifyContent: "center",
             alignItems: "center",
-            gap: "30px",
+            gap: { xs: 2, sm: 3 },
+            maxWidth: 1240,
+            mx: "auto",
+            mt: 3,
           }}
         >
           {trips.map((trip) => (
             <Box
               key={trip.uniqueId}
               sx={{
-                width: { xs: "100%", sm: "45%", md: "30%" }, // Responsive widths
+                width: { xs: "100%", sm: "calc(50% - 12px)", md: "calc(33.333% - 16px)" },
                 boxSizing: "border-box",
-                padding: "10px",
-                marginBottom: "20px",
+                padding: 0,
+                marginBottom: 0,
               }}
             >
               <TripCard
@@ -104,3 +109,7 @@ const TripDetails = ({ refreshKey }) => {
 };
 
 export default TripDetails;
+
+TripDetails.propTypes = {
+  refreshKey: PropTypes.number.isRequired,
+};

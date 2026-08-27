@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { createTheme } from "@mui/material/styles";
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -11,13 +10,11 @@ import { DashboardLayout } from "@toolpad/core/DashboardLayout";
 import { useDemoRouter } from "@toolpad/core/internal";
 import { useNavigate } from "react-router-dom";
 import CreateTripForm from "../Components/CreateTripForm";
-import TripCard from "../Components/TripCard"; // Ensure this is correctly imported
-import SplitExpenseForm from "../Components/SplitExpenseForm";
 import { useAuth } from "../Auth/AuthProvider";
 import LogoutIcon from "@mui/icons-material/Logout";
 import JoinTrip from "../Components/JoinTrip";
 import UpiForm from "../Components/UpiForm";
-import { Link, Outlet } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import RequestPageIcon from "@mui/icons-material/RequestPage";
 import RefreshIcon from "@mui/icons-material/Refresh";
