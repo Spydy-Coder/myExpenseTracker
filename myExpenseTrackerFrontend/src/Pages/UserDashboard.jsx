@@ -50,6 +50,7 @@ function UserDashboard(props) {
   const [isJoinTripFormOpen, setIsJoinTripFormOpen] = useState(false);
   const [isUpiFormOpen, setIsUpiFormOpen] = useState(false);
   const [pendingRequest, setPendingRequest] = useState(0);
+  const [tripRefreshKey, setTripRefreshKey] = useState(0);
   const handleRefresh = async () => {
     navigate(0);
   };
@@ -113,6 +114,11 @@ function UserDashboard(props) {
   };
   const handleOpenUpiForm = () => setIsUpiFormOpen(true);
   const handleCloseUpiForm = () => setIsUpiFormOpen(false);
+
+  const handleTripChanged = () => {
+    setTripRefreshKey((currentKey) => currentKey + 1);
+    navigate(`/dashboard/${userId}`);
+  };
 
   const handleLogout = () => {
     logout();
@@ -227,12 +233,17 @@ function UserDashboard(props) {
     >
       <DashboardLayout>
         {/* Dynamic Content Rendered Here */}
-        <Outlet />
+        <Outlet context={{ tripRefreshKey }} />
         <CreateTripForm
           open={isCreateTripFormOpen}
           onClose={handleCloseCreateTripForm}
+          onTripCreated={handleTripChanged}
         />
-        <JoinTrip open={isJoinTripFormOpen} onClose={handleCloseChipForm} />
+        <JoinTrip
+          open={isJoinTripFormOpen}
+          onClose={handleCloseChipForm}
+          onTripJoined={handleTripChanged}
+        />
         <UpiForm open={isUpiFormOpen} onClose={handleCloseUpiForm} />
       </DashboardLayout>
     </AppProvider>

@@ -1,8 +1,10 @@
-import React from "react";
+import { useOutletContext } from "react-router-dom";
 import TripDetails from "./TripDetails";
 
 const DashboardContent = () => {
-  return <TripDetails/>
+  const { tripRefreshKey } = useOutletContext();
+
+  return <TripDetails refreshKey={tripRefreshKey} />;
 };
 
 export default DashboardContent;

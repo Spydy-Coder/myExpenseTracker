@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 const DEFAULT_TRIP_PHOTO =
   "https://www.shutterstock.com/shutterstock/photos/1247506609/display_1500/stock-vector-cabriolet-car-with-people-diverse-group-of-men-and-women-enjoy-ride-and-music-happy-young-friends-1247506609.jpg";
 
-const TripDetails = () => {
+const TripDetails = ({ refreshKey }) => {
   const [trips, setTrips] = useState([]);
   const userId = localStorage.getItem("userId");
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -32,7 +32,7 @@ const TripDetails = () => {
     };
 
     fetchTrips();
-  }, [apiUrl, userId]);
+  }, [apiUrl, userId, refreshKey]);
 
   const onCardClick = (tripId) => {
     navigate(`/dashboard/trip/${tripId}`);

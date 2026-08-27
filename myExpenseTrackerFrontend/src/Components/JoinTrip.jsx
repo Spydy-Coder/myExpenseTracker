@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import PropTypes from "prop-types";
 import {
   Dialog,
   DialogTitle,
@@ -6,11 +7,10 @@ import {
   TextField,
   Button,
   DialogActions,
-  Typography,
   Alert,
 } from "@mui/material";
 
-const JoinTrip = ({ open, onClose }) => {
+const JoinTrip = ({ open, onClose, onTripJoined }) => {
   const [tripCode, setTripCode] = useState("");
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState(""); // State for success message
@@ -41,12 +41,13 @@ const JoinTrip = ({ open, onClose }) => {
       if (response.ok) {
         setSuccessMessage("Successfully joined the trip!"); // Set success message
         setError(""); // Clear any previous errors
+        onTripJoined?.();
         onClose();
       } else {
         setError(data.message || "Failed to join the trip");
         setSuccessMessage(""); // Clear success message if there is an error
       }
-    } catch (error) {
+    } catch {
       setError("An error occurred. Please try again.");
       setSuccessMessage(""); // Clear success message if there is an error
     }
@@ -119,3 +120,9 @@ const JoinTrip = ({ open, onClose }) => {
 };
 
 export default JoinTrip;
+
+JoinTrip.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onTripJoined: PropTypes.func,
+};

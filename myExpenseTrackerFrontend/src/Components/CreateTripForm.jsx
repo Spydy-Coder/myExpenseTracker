@@ -1,4 +1,4 @@
-import * as React from "react";
+import PropTypes from "prop-types";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Dialog from "@mui/material/Dialog";
@@ -41,7 +41,7 @@ const compressImage = (file) =>
     reader.readAsDataURL(file);
   });
 
-export default function CreateTripForm({ open, onClose }) {
+export default function CreateTripForm({ open, onClose, onTripCreated }) {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedPhoto, setSelectedPhoto] = useState("");
   const [openUnique, setOpenUnique] = useState(false);
@@ -104,6 +104,7 @@ export default function CreateTripForm({ open, onClose }) {
           setOpenUnique(true); // Open the Unique ID popup after setting the ID
         }, 500);
 
+        onTripCreated?.();
         onClose(); // Close the dialog
       } else {
         console.error("Failed to create trip.");
@@ -217,3 +218,9 @@ export default function CreateTripForm({ open, onClose }) {
     </>
   );
 }
+
+CreateTripForm.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onTripCreated: PropTypes.func,
+};
