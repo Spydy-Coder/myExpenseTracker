@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import PropTypes from "prop-types";
 import {
   Box,
   Button,
@@ -16,6 +17,7 @@ import {
   Paper,
   CircularProgress,
   Divider,
+  Avatar,
 } from "@mui/material";
 import { formatCurrency, sumCurrency } from "../utils/currency";
 
@@ -137,6 +139,9 @@ function ExpensePopup({ tripId, userId, open, onClose }) {
                       <strong>Description</strong>
                     </TableCell>
                     <TableCell>
+                      <strong>Added by</strong>
+                    </TableCell>
+                    <TableCell>
                       <strong>Status</strong>
                     </TableCell>
                   </TableRow>
@@ -147,6 +152,18 @@ function ExpensePopup({ tripId, userId, open, onClose }) {
                       <TableCell>{expense.category}</TableCell>
                       <TableCell align="right">₹{formatCurrency(expense.amount)}</TableCell>
                       <TableCell>{expense.desc}</TableCell>
+                      <TableCell>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                          <Avatar sx={{ width: 26, height: 26, bgcolor: "primary.light", fontSize: "0.75rem" }}>
+                            {(String(expense.issued_by?._id) === userId ? "Self" : expense.issued_by?.username || "?").charAt(0).toUpperCase()}
+                          </Avatar>
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            {String(expense.issued_by?._id) === userId
+                              ? "Self"
+                              : expense.issued_by?.username || "Unknown"}
+                          </Typography>
+                        </Box>
+                      </TableCell>
                       <TableCell>
                         {expense.paid ? (
                           <Typography
@@ -182,3 +199,10 @@ function ExpensePopup({ tripId, userId, open, onClose }) {
 }
 
 export default ExpensePopup;
+
+ExpensePopup.propTypes = {
+  tripId: PropTypes.string.isRequired,
+  userId: PropTypes.string.isRequired,
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+};

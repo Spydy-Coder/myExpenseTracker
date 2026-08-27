@@ -68,7 +68,7 @@ const getTotalExpense = async (req, res) => {
     const result = await Expense.findOne({
       user_id: userId,
       trip_id: tripId,
-    });
+    }).populate("expenses.issued_by", "username");
 
     // Check if a result was found
     if (!result) {
