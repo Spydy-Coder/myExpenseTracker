@@ -90,22 +90,14 @@ export default function QrCodeHolder({ upiLink, upiId, upiPhoneNumber, amount })
   return (
     <React.Fragment>
       <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 1 }}>
-        {shouldOpenUpiApp ? (
-          <>
-            {upiLink && (
-              <Button variant="outlined" onClick={handleClickOpen}>
-                Show QR
-              </Button>
-            )}
-            <Button variant="contained" onClick={handlePayNow}>
-              Pay now
-            </Button>
-          </>
-        ) : upiLink ? (
+        {upiLink && (
           <Button variant="outlined" onClick={handleClickOpen}>
-            Download QR
+            {shouldOpenUpiApp ? "Show QR" : "Download QR"}
           </Button>
-        ) : null}
+        )}
+        <Button variant="contained" onClick={handlePayNow}>
+          Pay now
+        </Button>
       </Box>
       <BootstrapDialog
         onClose={handleClose}

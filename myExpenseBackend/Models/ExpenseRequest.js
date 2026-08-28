@@ -45,7 +45,6 @@ const expenseRequestSchema = new mongoose.Schema({
   money_left: {
     type: Number,
     default:0,
-    min: 0, // Ensure no negative amounts
   },
   moneyToBeReceive: {
     type: Number,

@@ -10,6 +10,8 @@ import {
   Tooltip,
   IconButton,
   Chip,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import { grey, red, green, blue } from "@mui/material/colors";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
@@ -26,6 +28,7 @@ function ExpenseRequest() {
   const apiUrl = import.meta.env.VITE_API_URL;
   const [tooltipText, setTooltipText] = useState("Copy");
   const boxRef = useRef(null);
+  const [activeTab, setActiveTab] = useState(0);
 
   useEffect(() => {
     if (boxRef.current) {
@@ -69,6 +72,14 @@ function ExpenseRequest() {
 
     return `upi://pay?${params.toString()}`;
   };
+
+  const pendingRequests = expenseRequests.filter(
+    (request) => !request.expenses.every((expense) => expense.paid)
+  );
+  const settledRequests = expenseRequests.filter((request) =>
+    request.expenses.every((expense) => expense.paid)
+  );
+  const visibleRequests = activeTab === 0 ? pendingRequests : settledRequests;
 
   useEffect(() => {
     fetchExpenseRequests();
@@ -165,34 +176,75 @@ function ExpenseRequest() {
           Review balances, settle up, and keep every trip on track.
         </Typography>
       </Box>
-      {expenseRequests.length === 0 && (
-        <Box sx={{ mt: 4, py: 5, px: 3, width: "100%", maxWidth: 440, textAlign: "center", bgcolor: "rgba(255,255,255,0.8)", border: "1px dashed #a9c8e5", borderRadius: 4 }}>
-          <AccountBalanceWalletOutlinedIcon color="primary" sx={{ fontSize: 42, mb: 1 }} />
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>No payment requests</Typography>
-          <Typography variant="body2" color="text.secondary">You&apos;re all caught up for now.</Typography>
-        </Box>
-      )}
-      {expenseRequests.map((request) => (
-        <Card
-          key={request.trip_id}
+
+      <Box sx={{ width: "100%", display: "flex", justifyContent: "center", mb: 1 }}>
+        <Tabs
+          value={activeTab}
+          onChange={(_, value) => setActiveTab(value)}
+          variant="scrollable"
+          scrollButtons="auto"
           sx={{
-            width: { xs: "100%", sm: 350 },
-            minWidth: 0,
-            maxWidth: "100%",
-            minHeight: 530,
-            height: "auto",
-            boxShadow: "0 10px 28px rgba(36, 78, 120, 0.12)",
-            borderRadius: "20px",
-            border: "1px solid rgba(255,255,255,0.85)",
-            overflow: "hidden",
-            background: "linear-gradient(135deg, #ffffff, #f0f4ff)",
-            transition: "transform 0.2s ease-in-out, box-shadow 0.2s",
-            "&:hover": {
-              transform: "translateY(-5px)",
-              boxShadow: "0 18px 38px rgba(36, 78, 120, 0.2)",
+            minHeight: 42,
+            "& .MuiTab-root": {
+              minHeight: 42,
+              textTransform: "none",
+              fontWeight: 800,
+              px: 2.5,
             },
           }}
         >
+          <Tab label={`Pending (${pendingRequests.length})`} />
+          <Tab label={`History (${settledRequests.length})`} />
+        </Tabs>
+      </Box>
+
+      {visibleRequests.length === 0 && (
+        <Box sx={{ mt: 4, py: 5, px: 3, width: "100%", maxWidth: 440, textAlign: "center", bgcolor: "rgba(255,255,255,0.8)", border: "1px dashed #a9c8e5", borderRadius: 4 }}>
+          <AccountBalanceWalletOutlinedIcon color="primary" sx={{ fontSize: 42, mb: 1 }} />
+          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+            {activeTab === 0 ? "No pending requests" : "No settled requests yet"}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {activeTab === 0
+              ? "You're all caught up for now."
+              : "Settled requests will appear here."}
+          </Typography>
+        </Box>
+      )}
+      {visibleRequests.map((request) => {
+        const isSettled = request.expenses.every((expense) => expense.paid);
+        const isPending = !isSettled;
+        const balance = Number(request.money_left);
+        const paymentAmount = balance < 0
+          ? Math.abs(balance)
+          : Number(request.total_money);
+        const canPay =
+          isPending &&
+          balance <= 0 &&
+          Boolean(request.payee?.upiId) &&
+          paymentAmount > 0;
+
+        return (
+          <Card
+            key={request.trip_id}
+            sx={{
+              width: { xs: "100%", sm: 350 },
+              minWidth: 0,
+              maxWidth: "100%",
+              minHeight: 530,
+              height: "auto",
+              boxShadow: "0 10px 28px rgba(36, 78, 120, 0.12)",
+              borderRadius: "20px",
+              border: "1px solid #b8cce0",
+              overflow: "hidden",
+              background: "linear-gradient(135deg, #ffffff, #f0f4ff)",
+              transition: "transform 0.2s ease-in-out, box-shadow 0.2s",
+              "&:hover": {
+                transform: "translateY(-5px)",
+                boxShadow: "0 18px 38px rgba(36, 78, 120, 0.2)",
+              },
+            }}
+          >
           <CardContent
             sx={{
               display: "flex",
@@ -202,20 +254,26 @@ function ExpenseRequest() {
               minWidth: 0,
               p: { xs: 2, sm: 3 },
             }}
-          >
+            >
             {/* Trip ID and Payee */}
             <Box sx={{ p: 2, mb: 2, borderRadius: 3, background: "linear-gradient(135deg, #e9f5ff, #f1edff)" }}>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 1, mb: 1.5 }}>
                 <Box sx={{ minWidth: 0 }}>
-                  <Typography variant="caption" sx={{ color: "#52708f", letterSpacing: 0.8, fontWeight: 800 }}>TRIP BALANCE</Typography>
+                  <Typography variant="caption" sx={{ color: "#52708f", letterSpacing: 0.8, fontWeight: 800 }}>
+                    TRIP BALANCE
+                  </Typography>
                   <Typography variant="h6" sx={{ fontWeight: 800, color: blue[900], overflowWrap: "anywhere", lineHeight: 1.25 }}>
                     {request.trip_id}
                   </Typography>
                 </Box>
                 <Chip
                   size="small"
-                  label={request.expenses.every((expense) => expense.paid) ? "Settled" : "Pending"}
-                  sx={{ bgcolor: request.expenses.every((expense) => expense.paid) ? green[100] : red[100], color: request.expenses.every((expense) => expense.paid) ? green[800] : red[800], fontWeight: 800 }}
+                  label={isSettled ? "Settled" : "Pending"}
+                  sx={{
+                    bgcolor: isSettled ? green[100] : red[100],
+                    color: isSettled ? green[800] : red[800],
+                    fontWeight: 800,
+                  }}
                 />
               </Box>
               <Typography
@@ -354,49 +412,56 @@ function ExpenseRequest() {
                   gap: 1,
                 }}
               >
-                <Button
-                  variant="contained"
-                  color="success"
-                  sx={{ borderRadius: 2, px: 2, fontWeight: 700, boxShadow: "none" }}
-                  onClick={() =>
-                    handleMarkAsPaid(
-                      request.trip_id,
-                      request.payee,
-                      request.expenses
-                    )
-                  }
-                >
-                  Mark as Paid
-                </Button>
-                {request.money_left < 0 && request.payee.upiId && (
+                {isPending && (
+                  <Button
+                    variant="contained"
+                    color="success"
+                      sx={{ borderRadius: 2, px: 2, fontWeight: 700, boxShadow: "none" }}
+                      onClick={() =>
+                        handleMarkAsPaid(
+                          request.trip_id,
+                          request.payee,
+                          request.expenses
+                        )
+                      }
+                  >
+                    Mark as Paid
+                  </Button>
+                )}
+                {canPay && (
                   <QrCodeHolder
                     upiLink={paymentUpiLink(
                       request.payee.upiId,
-                      Number(formatCurrency(Math.abs(request.money_left))),
+                      paymentAmount,
                     )}
                     upiId={request.payee.upiId}
                     upiPhoneNumber={request.payee.upiPhoneNumber}
-                    amount={formatCurrency(Math.abs(request.money_left))}
+                    amount={formatCurrency(paymentAmount)}
                   />
                 )}
               </Box>
 
-              <Typography
-                variant="caption"
-                sx={{
-                  display: "block",
-                  color: grey[700],
-                  mt: 1,
-                  textAlign: "center",
-                  fontStyle: "italic",
-                }}
-              >
-                * Click Mark as Paid after you&apos;ve paid or received the amount.
-              </Typography>
+              {isPending && (
+                <>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      display: "block",
+                      color: grey[700],
+                      mt: 1,
+                      textAlign: "center",
+                      fontStyle: "italic",
+                    }}
+                  >
+                    * Click Mark as Paid after you&apos;ve paid or received the amount.
+                  </Typography>
+                </>
+              )}
             </Box>
           </CardContent>
-        </Card>
-      ))}
+          </Card>
+        );
+      })}
     </Box>
   );
 }
