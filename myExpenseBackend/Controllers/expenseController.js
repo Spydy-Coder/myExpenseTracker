@@ -1,5 +1,6 @@
 const Expense = require("../Models/Expense");
 const ExpenseRequest = require("../Models/ExpenseRequest");
+const Trip = require("../Models/TripSchema");
 
 const roundCurrency = (value) => {
   const amount = Number(value);
@@ -281,12 +282,24 @@ const getExpensesRequestByUser = async (req, res) => {
 
     // Step 1: Fetch all expenses for the given userId
     const expensesData = await ExpenseRequest.find({ user_id: userId })
-      .populate("payee", "id username upiId upiPhoneNumber") // Populate payee details
-      .populate("trip_id", "uniqueId tripName"); // Populate trip details
+      .populate("payee", "id username upiId upiPhoneNumber")
+      .lean();
+
+    const tripIds = [...new Set(expensesData.map((request) => request.trip_id))];
+    const trips = await Trip.find({ uniqueId: { $in: tripIds } })
+      .select("uniqueId tripName")
+      .lean();
+    const tripNamesById = new Map(
+      trips.map((trip) => [trip.uniqueId, trip.tripName])
+    );
+    const requestsWithTripNames = expensesData.map((request) => ({
+      ...request,
+      tripName: tripNamesById.get(request.trip_id) || request.trip_id,
+    }));
 
     res.status(200).json({
       message: "Expenses Request fetched successfully",
-      data: expensesData,
+      data: requestsWithTripNames,
     });
   } catch (error) {
     console.error("Error fetching expenses:", error);

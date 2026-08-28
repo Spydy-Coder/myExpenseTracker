@@ -218,6 +218,9 @@ function ExpenseRequest() {
         const paymentAmount = balance < 0
           ? Math.abs(balance)
           : Number(request.total_money);
+        const tripName = request.tripName || request.trip_id;
+        const displayTripName =
+          tripName.length > 28 ? `${tripName.slice(0, 28)}...` : tripName;
         const canPay =
           isPending &&
           balance <= 0 &&
@@ -260,11 +263,13 @@ function ExpenseRequest() {
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 1, mb: 1.5 }}>
                 <Box sx={{ minWidth: 0 }}>
                   <Typography variant="caption" sx={{ color: "#52708f", letterSpacing: 0.8, fontWeight: 800 }}>
-                    TRIP BALANCE
+                    TRIP PAYMENT
                   </Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 800, color: blue[900], overflowWrap: "anywhere", lineHeight: 1.25 }}>
-                    {request.trip_id}
-                  </Typography>
+                  <Tooltip title={tripName} arrow>
+                    <Typography variant="h6" sx={{ fontWeight: 800, color: blue[900], overflowWrap: "anywhere", lineHeight: 1.25 }}>
+                      {displayTripName}
+                    </Typography>
+                  </Tooltip>
                 </Box>
                 <Chip
                   size="small"
