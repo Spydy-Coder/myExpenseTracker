@@ -22,11 +22,14 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  Chip,
 } from "@mui/material";
 import { useParams } from "react-router-dom";
 import InsertChartOutlinedIcon from "@mui/icons-material/InsertChartOutlined";
 import DeleteIcon from "@mui/icons-material/Delete";
 import HandymanIcon from "@mui/icons-material/Handyman";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import RequestQuoteIcon from "@mui/icons-material/RequestQuote";
 import { formatCurrency, sumCurrency } from "../utils/currency";
 
 function ExpensesCards() {
@@ -277,8 +280,10 @@ function ExpensesCards() {
                 width: { xs: "100%", sm: 352 },
                 minWidth: 0,
                 maxWidth: "100%",
-                boxShadow: 6,
-                borderRadius: "16px",
+                boxShadow: "0 10px 28px rgba(36, 78, 120, 0.12)",
+                borderRadius: "20px",
+                border: userId === currentUserId ? "1px solid #bde5ca" : "1px solid #d7e4ef",
+                overflow: "hidden",
                 transition: "transform 0.2s ease-in-out, box-shadow 0.2s",
                 "&::-webkit-scrollbar": {
                   width: "4px", // Width of the vertical scrollbar
@@ -296,36 +301,29 @@ function ExpensesCards() {
                   borderRadius: "4px",
                 },
                 "&:hover": {
-                  transform: { xs: "none", sm: "scale(1.05)" },
-                  boxShadow: 10,
+                  transform: "translateY(-4px)",
+                  boxShadow: "0 18px 38px rgba(36, 78, 120, 0.2)",
                 },
                 background:
                   userId === currentUserId
-                    ? "linear-gradient(145deg, #d4fc79, #96e6a1)"
-                    : "#ffffff",
+                    ? "linear-gradient(145deg, #f2fff6, #e6f8ec)"
+                    : "linear-gradient(145deg, #ffffff, #f6faff)",
               }}
             >
-              <CardContent>
-                <Typography
-                  variant="h5"
-                  component="div"
-                  gutterBottom
-                  sx={{
-                    fontWeight: "bold",
-                    color: userId === currentUserId ? "#2d6a4f" : "#264653",
-                    textAlign: "center",
-                  }}
-                >
-                  {userId === currentUserId ? "Your Expenses" : user.name}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ textAlign: "center", mb: 2 }}
-                >
-                  {user.email}
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
+              <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, mb: 2 }}>
+                  <Avatar sx={{ width: 46, height: 46, bgcolor: userId === currentUserId ? "#2d8c55" : "#3c77aa", fontWeight: 800 }}>
+                    {(userId === currentUserId ? "You" : user.name || "?").charAt(0).toUpperCase()}
+                  </Avatar>
+                  <Box sx={{ minWidth: 0, flexGrow: 1 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 800, color: userId === currentUserId ? "#246b42" : "#264653", overflowWrap: "anywhere" }}>
+                      {userId === currentUserId ? "Your expenses" : user.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">Expense breakdown</Typography>
+                  </Box>
+                  <Chip size="small" label={userId === currentUserId ? "You" : "Member"} sx={{ fontWeight: 700, bgcolor: userId === currentUserId ? "#dff5e6" : "#e8f2fb", color: userId === currentUserId ? "#207440" : "#27628e" }} />
+                </Box>
+                <Divider sx={{ mb: 2, borderColor: "rgba(102, 140, 174, 0.25)" }} />
 
                 <TableContainer
                   component={Paper}
@@ -334,8 +332,9 @@ function ExpensesCards() {
                   sx={{
                     width: "100%",
                     height: { xs: "250px", sm: "250px", md: "300px" }, // Set a fixed height for the table container
-                    background: "#f9f9f9",
-                    borderRadius: "8px",
+                    background: "#ffffff",
+                    border: "1px solid #dce8f1",
+                    borderRadius: "12px",
                     overflowY: "auto", // Enable scrolling if content exceeds height
                     overflowX: "auto",
                     "&::-webkit-scrollbar": {
@@ -357,17 +356,17 @@ function ExpensesCards() {
                 >
                   <Table sx={{ width: "100%", tableLayout: "fixed" }}>
                     <TableHead>
-                      <TableRow sx={{ backgroundColor: "#eeeeee" }}>
-                        <TableCell align="left" sx={{ px: { xs: 1, sm: 2 }, wordBreak: "break-word" }}>
+                      <TableRow sx={{ backgroundColor: "#edf5fb" }}>
+                        <TableCell align="left" sx={{ px: { xs: 1, sm: 2 }, wordBreak: "break-word", color: "#315d7e" }}>
                           <strong>Category</strong>
                         </TableCell>
-                        <TableCell align="left" sx={{ px: { xs: 1, sm: 2 }, wordBreak: "break-word" }}>
+                        <TableCell align="left" sx={{ px: { xs: 1, sm: 2 }, wordBreak: "break-word", color: "#315d7e" }}>
                           <strong>Amount</strong>
                         </TableCell>
-                        <TableCell align="left" sx={{ px: { xs: 1, sm: 2 }, wordBreak: "break-word" }}>
+                        <TableCell align="left" sx={{ px: { xs: 1, sm: 2 }, wordBreak: "break-word", color: "#315d7e" }}>
                           <strong>Description</strong>
                         </TableCell>
-                        <TableCell align="center" sx={{ px: { xs: 0.5, sm: 2 }, width: { xs: 38, sm: 56 } }}>
+                        <TableCell align="center" sx={{ px: { xs: 0.5, sm: 2 }, width: { xs: 38, sm: 56 }, color: "#315d7e" }}>
                           <strong>
                             <HandymanIcon
                               sx={{ height: "20px", width: "20px" }}
@@ -379,12 +378,12 @@ function ExpensesCards() {
                     </TableHead>
                     <TableBody>
                       {expenses.map((expense) => (
-                        <TableRow key={expense._id}>
+                        <TableRow key={expense._id} sx={{ "&:hover": { bgcolor: "#f7fbff" }, "&:last-child td": { borderBottom: 0 } }}>
                           <TableCell align="left" sx={{ px: { xs: 1, sm: 2 }, wordBreak: "break-word" }}>{expense.category}</TableCell>
                           <TableCell
                             align="left"
                             sx={{
-                              color: expense.paid ? "green" : "red", // Green if true, red if false
+                              color: expense.paid ? "#1c7d45" : "#bd3030",
                               px: { xs: 1, sm: 2 },
                               wordBreak: "break-word",
                             }}
@@ -440,10 +439,10 @@ function ExpensesCards() {
                     flexDirection: "column",
                     justifyContent: "space-between",
                     alignItems: "center",
-                    background: "#f4f4f4",
-                    padding: "12px",
-                    borderRadius: "8px",
-                    boxShadow: "inset 0 1px 3px rgba(0,0,0,0.1)",
+                    background: userId === currentUserId ? "#e9f8ee" : "#eef6fc",
+                    padding: "14px",
+                    borderRadius: "12px",
+                    border: "1px solid rgba(70, 126, 166, 0.14)",
                   }}
                 >
                   <Typography variant="subtitle1">
@@ -480,7 +479,7 @@ function ExpensesCards() {
                   ) : (
                     <Typography
                       variant="subtitle1"
-                      sx={{ fontStyle: "italic", color: "#2a9d8f" }}
+                      sx={{ fontStyle: "italic", color: "#2a9d8f", textAlign: "center", width: "100%" }}
                     >
                       <strong>* Includes only my contributions</strong>
                     </Typography>
@@ -499,12 +498,14 @@ function ExpensesCards() {
                   {" "}
                   {userId !== currentUserId ? (
                     <Button
+                      startIcon={<RequestQuoteIcon />}
                       sx={{
-                        backgroundColor: "#219ebc",
+                        backgroundColor: "#2175a9",
                         color: "#FFF",
                         fontWeight: "bold",
+                        borderRadius: 2,
                         "&:hover": {
-                          backgroundColor: "#126782",
+                          backgroundColor: "#15547d",
                         },
                       }}
                       variant="contained"
@@ -516,12 +517,14 @@ function ExpensesCards() {
                     </Button>
                   ) : null}
                   <Button
+                    startIcon={<ContentCopyIcon />}
                     sx={{
-                      backgroundColor: "#219ebc",
+                      backgroundColor: "#2175a9",
                       color: "#FFF",
                       fontWeight: "bold",
+                      borderRadius: 2,
                       "&:hover": {
-                        backgroundColor: "#126782",
+                        backgroundColor: "#15547d",
                       },
                     }}
                     variant="contained"
