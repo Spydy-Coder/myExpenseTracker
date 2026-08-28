@@ -20,6 +20,11 @@ import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
 import QrCodeHolder from "./QrCodeHolder";
 import { formatCurrency } from "../utils/currency";
 
+const isRequestSettled = (request) =>
+  Array.isArray(request.expenses) &&
+  request.expenses.length > 0 &&
+  request.expenses.every((expense) => expense.paid === true);
+
 function ExpenseRequest() {
   const userId = localStorage.getItem("userId");
   const [expenseRequests, setExpenseRequests] = useState([]);
@@ -74,11 +79,9 @@ function ExpenseRequest() {
   };
 
   const pendingRequests = expenseRequests.filter(
-    (request) => !request.expenses.every((expense) => expense.paid)
+    (request) => !isRequestSettled(request)
   );
-  const settledRequests = expenseRequests.filter((request) =>
-    request.expenses.every((expense) => expense.paid)
-  );
+  const settledRequests = expenseRequests.filter(isRequestSettled);
   const visibleRequests = activeTab === 0 ? pendingRequests : settledRequests;
 
   useEffect(() => {
@@ -212,7 +215,7 @@ function ExpenseRequest() {
         </Box>
       )}
       {visibleRequests.map((request) => {
-        const isSettled = request.expenses.every((expense) => expense.paid);
+        const isSettled = isRequestSettled(request);
         const isPending = !isSettled;
         const balance = Number(request.money_left);
         const paymentAmount = balance < 0
@@ -229,7 +232,7 @@ function ExpenseRequest() {
 
         return (
           <Card
-            key={request.trip_id}
+            key={`${request.trip_id}-${request.payee?.username || "unknown-payee"}`}
             sx={{
               width: { xs: "100%", sm: 350 },
               minWidth: 0,
@@ -286,6 +289,11 @@ function ExpenseRequest() {
                 sx={{
                   color: grey[700],
                   overflowWrap: "anywhere",
+                  "& strong": {
+                    color: blue[900],
+                    fontSize: "1.1rem",
+                    fontWeight: 800,
+                  },
                 }}
               >
                 Payee <strong>{request.payee.username}</strong>
