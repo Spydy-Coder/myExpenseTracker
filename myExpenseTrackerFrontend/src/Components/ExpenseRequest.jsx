@@ -12,11 +12,14 @@ import {
   Chip,
   Tabs,
   Tab,
+  TextField,
+  InputAdornment,
 } from "@mui/material";
 import { grey, red, green, blue } from "@mui/material/colors";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
 import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
+import SearchIcon from "@mui/icons-material/Search";
 import QrCodeHolder from "./QrCodeHolder";
 import { formatCurrency } from "../utils/currency";
 
@@ -34,6 +37,7 @@ function ExpenseRequest() {
   const [tooltipText, setTooltipText] = useState("Copy");
   const boxRef = useRef(null);
   const [activeTab, setActiveTab] = useState(0);
+  const [filterQuery, setFilterQuery] = useState("");
 
   useEffect(() => {
     if (boxRef.current) {
@@ -78,10 +82,18 @@ function ExpenseRequest() {
     return `upi://pay?${params.toString()}`;
   };
 
-  const pendingRequests = expenseRequests.filter(
+  const normalizedFilterQuery = filterQuery.trim().toLowerCase();
+  const filteredRequests = expenseRequests.filter((request) => {
+    if (!normalizedFilterQuery) return true;
+
+    return [request.tripName, request.trip_id, request.payee?.username].some(
+      (value) => value?.toLowerCase().includes(normalizedFilterQuery)
+    );
+  });
+  const pendingRequests = filteredRequests.filter(
     (request) => !isRequestSettled(request)
   );
-  const settledRequests = expenseRequests.filter(isRequestSettled);
+  const settledRequests = filteredRequests.filter(isRequestSettled);
   const visibleRequests = activeTab === 0 ? pendingRequests : settledRequests;
 
   useEffect(() => {
@@ -179,6 +191,22 @@ function ExpenseRequest() {
           Review balances, settle up, and keep every trip on track.
         </Typography>
       </Box>
+
+      <TextField
+        value={filterQuery}
+        onChange={(event) => setFilterQuery(event.target.value)}
+        placeholder="Filter by trip or payee"
+        size="small"
+        sx={{ width: "100%", maxWidth: 460, bgcolor: "rgba(255,255,255,0.9)" }}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon color="action" />
+            </InputAdornment>
+          ),
+        }}
+        inputProps={{ "aria-label": "Filter payment requests by trip or payee" }}
+      />
 
       <Box sx={{ width: "100%", display: "flex", justifyContent: "center", mb: 1 }}>
         <Tabs
