@@ -26,12 +26,18 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiPaper-root": {
     width: "350px", // Set the width of the dialog
     maxWidth: "90%", // Ensure it doesn't overflow on small screens
+    maxWidth: "90%", // Ensure it doesn't overflow on small screens
     height: "auto", // Let the height adjust based on content
     borderRadius: "12px", // Optional: Add rounded corners
   },
 }));
 
-export default function QrCodeHolder({ upiLink, upiId, upiPhoneNumber, amount }) {
+export default function QrCodeHolder({
+  upiLink,
+  upiId,
+  upiPhoneNumber,
+  amount,
+}) {
   const [open, setOpen] = React.useState(false);
   const [payOpen, setPayOpen] = React.useState(false);
   const [copied, setCopied] = React.useState(false);
@@ -70,26 +76,68 @@ export default function QrCodeHolder({ upiLink, upiId, upiPhoneNumber, amount })
     await navigator.clipboard.writeText(amount);
     setAmountCopied(true);
   };
-
   const handleDownload = () => {
     const svg = qrCodeRef.current?.querySelector("svg");
     if (!svg) return;
 
     const svgMarkup = new XMLSerializer().serializeToString(svg);
-    const svgBlob = new Blob([svgMarkup], { type: "image/svg+xml;charset=utf-8" });
-    const downloadUrl = URL.createObjectURL(svgBlob);
-    const link = document.createElement("a");
-    link.href = downloadUrl;
-    link.download = "expense-payment-qr.svg";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(downloadUrl);
+    const svgBlob = new Blob([svgMarkup], {
+      type: "image/svg+xml;charset=utf-8",
+    });
+
+    const url = URL.createObjectURL(svgBlob);
+    const img = new Image();
+
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const scale = 3; // Higher quality
+
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+
+      const ctx = canvas.getContext("2d");
+
+      // JPEG doesn't support transparency, so use a white background
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) return;
+
+          const downloadUrl = URL.createObjectURL(blob);
+
+          const link = document.createElement("a");
+          link.href = downloadUrl;
+          link.download = "expense-payment-qr.jpg";
+
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+
+          URL.revokeObjectURL(downloadUrl);
+          URL.revokeObjectURL(url);
+        },
+        "image/jpeg",
+        1.0,
+      );
+    };
+
+    img.src = url;
   };
 
   return (
     <React.Fragment>
-      <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 1 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "center",
+          gap: 1,
+        }}
+      >
         {upiLink && (
           <Button variant="outlined" onClick={handleClickOpen}>
             {shouldOpenUpiApp ? "Show QR" : "Download QR"}
@@ -117,7 +165,15 @@ export default function QrCodeHolder({ upiLink, upiId, upiPhoneNumber, amount })
           <CloseIcon />
         </IconButton>
         <DialogContent dividers>
-          <Box ref={qrCodeRef} sx={{ display: "inline-flex", p: 1, bgcolor: "#fff", borderRadius: 1 }}>
+          <Box
+            ref={qrCodeRef}
+            sx={{
+              display: "inline-flex",
+              p: 1,
+              bgcolor: "#fff",
+              borderRadius: 1,
+            }}
+          >
             <QRCode value={upiLink} size={200} />
           </Box>
           <Typography variant="body1" sx={{ mt: 2, mb: 2 }}>
@@ -168,7 +224,12 @@ export default function QrCodeHolder({ upiLink, upiId, upiPhoneNumber, amount })
           </Box>
         </DialogContent>
       </BootstrapDialog>
-      <Dialog onClose={() => setPayOpen(false)} open={payOpen} fullWidth maxWidth="xs">
+      <Dialog
+        onClose={() => setPayOpen(false)}
+        open={payOpen}
+        fullWidth
+        maxWidth="xs"
+      >
         <DialogContent dividers>
           <Typography variant="h6" sx={{ mb: 2 }}>
             Pay from your UPI app
@@ -181,7 +242,10 @@ export default function QrCodeHolder({ upiLink, upiId, upiPhoneNumber, amount })
               <Typography sx={{ overflowWrap: "anywhere", flexGrow: 1 }}>
                 UPI Mobile Number: <strong>{upiPhoneNumber}</strong>
               </Typography>
-              <IconButton aria-label="copy UPI mobile number" onClick={handleCopyPhoneNumber}>
+              <IconButton
+                aria-label="copy UPI mobile number"
+                onClick={handleCopyPhoneNumber}
+              >
                 <ContentCopyIcon fontSize="small" />
               </IconButton>
             </Box>
